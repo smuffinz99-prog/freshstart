@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Good Pressure social image</title>
+<!-- Renders the 1200x630 social share image. Regenerate with: node tools/make-assets.js -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
+<style>
+  html, body { margin: 0; background: #34332d; }
+  .og { position: relative; width: 1200px; height: 630px; overflow: hidden; font-family: Archivo, sans-serif; }
+  canvas { position: absolute; inset: 0; width: 1200px; height: 630px; }
+  .shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5,10,18,.45), rgba(5,10,18,0) 55%); }
+  .brand { position: absolute; left: 64px; top: 56px; display: flex; align-items: center; gap: 14px; color: #fff; }
+  .brand svg { width: 52px; height: 52px; }
+  .brand b { font-weight: 800; font-size: 34px; letter-spacing: -.05em; font-stretch: 106%; }
+  .title { position: absolute; left: 64px; top: 168px; margin: 0; font-weight: 900; font-size: 100px; line-height: .86; letter-spacing: -.045em; text-transform: uppercase; color: transparent; }
+  .sub { position: absolute; left: 66px; bottom: 60px; margin: 0; color: rgba(255,255,255,.9); font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
+  .sub span { color: #22D8C5; }
+  .tag { position: absolute; right: 56px; bottom: 56px; padding: 12px 20px; border-radius: 999px; background: #0A1626; color: #fff; font: 500 18px "JetBrains Mono", monospace; letter-spacing: .04em; }
+  .tag i { font-style: normal; color: #22D8C5; }
+</style>
+</head>
+<body>
+<div class="og" id="og">
+  <canvas id="c" width="1200" height="630"></canvas>
+  <div class="shade"></div>
+  <div class="brand">
+    <svg viewBox="0 0 48 48"><path d="M24 2.6c-3.9 5.1-15.6 17.5-15.6 27.9a15.6 15.6 0 0 0 31.2 0C39.6 20.1 27.9 7.7 24 2.6z" fill="#22D8C5"/><path d="M15.6 34.1a9 9 0 1 1 16.8 0" fill="none" stroke="#0A1626" stroke-width="3.4" stroke-linecap="round"/><path d="M24 31l4.6-5.3" fill="none" stroke="#0A1626" stroke-width="3.4" stroke-linecap="round"/><circle cx="24" cy="31" r="2.7" fill="#0A1626"/></svg>
+    <b>good pressure</b>
+  </div>
+  <h1 class="title" id="t"><span class="ln">The good kind</span><br><span class="ln">of pressure.</span></h1>
+  <p class="sub">Driveways · Roofs · House washing · Decks · Solar <span>— Brisbane</span></p>
+  <span class="tag"><i>●</i> goodpressure.com.au</span>
+</div>
+<script src="assets/js/surface-engine.js"></script>
+<script>
+(async function () {
+  await document.fonts.load("900 100px Archivo");
+  await document.fonts.ready;
+  const c = document.getElementById('c');
+  const eng = new GPSurface.Engine(c, { allowSoftware: true, preserve: true });
+  const t = eng.target(1200, 630);
+  eng.bake(t, 'concrete', 260, 2.2, [0.4, 0.2]);
+
+  // headline painted into the grime (reverse graffiti)
+  const tc = document.createElement('canvas'); tc.width = 1200; tc.height = 630;
+  const x = tc.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, 1200, 630);
+  x.fillStyle = '#fff'; x.font = "900 100px Archivo"; x.textBaseline = 'alphabetic';
+  if ('letterSpacing' in x) x.letterSpacing = '-5px';
+  const base = 168 + 100 * 0.86 * 0.8;
+  x.fillText('THE GOOD KIND', 64, base);
+  x.fillText("OF PRESSURE.", 64, base + 100 * 0.86);
+  eng.setText(t, tc);
+
+  // a right-hand slice already washed clean, with a ragged spray edge
+  const m = document.createElement('canvas'); m.width = 1200; m.height = 630;
+  const mx = m.getContext('2d'); mx.fillStyle = '#000'; mx.fillRect(0, 0, 1200, 630);
+  mx.fillStyle = '#fff'; mx.beginPath(); mx.moveTo(1200, 0);
+  for (let y = 0; y <= 630; y += 6) mx.lineTo(948 + Math.sin(y * 0.05) * 5 + Math.sin(y * 0.21) * 2.5 + (Math.random() - .5) * 3, y);
+  mx.lineTo(1200, 630); mx.closePath(); mx.fill();
+  eng.setMask(t, m);
+  eng.draw(t, { useMask: true, vig: 0.28, wetDark: 0.66 });
+  document.body.dataset.ready = '1';
+})();
+</script>
+</body>
+</html>
