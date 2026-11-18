@@ -12,11 +12,11 @@
   html, body { margin: 0; background: #34332d; }
   .og { position: relative; width: 1200px; height: 630px; overflow: hidden; font-family: Archivo, sans-serif; }
   canvas { position: absolute; inset: 0; width: 1200px; height: 630px; }
-  .shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5,10,18,.45), rgba(5,10,18,0) 55%); }
+  .shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4,9,16,.78), rgba(4,9,16,.45) 40%, rgba(4,9,16,0) 66%), linear-gradient(180deg, rgba(4,9,16,.4), rgba(4,9,16,0) 30%); }
   .brand { position: absolute; left: 64px; top: 56px; display: flex; align-items: center; gap: 14px; color: #fff; }
   .brand svg { width: 52px; height: 52px; }
   .brand b { font-weight: 800; font-size: 34px; letter-spacing: -.05em; font-stretch: 106%; }
-  .title { position: absolute; left: 64px; top: 168px; margin: 0; font-weight: 900; font-size: 100px; line-height: .86; letter-spacing: -.045em; text-transform: uppercase; color: transparent; }
+  .title { position: absolute; left: 64px; top: 168px; margin: 0; font-weight: 900; font-size: 92px; line-height: .88; letter-spacing: -.045em; text-transform: uppercase; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,.4); }
   .sub { position: absolute; left: 66px; bottom: 60px; margin: 0; color: rgba(255,255,255,.9); font-size: 26px; font-weight: 600; letter-spacing: -.01em; }
   .sub span { color: #22D8C5; }
   .tag { position: absolute; right: 56px; bottom: 56px; padding: 12px 20px; border-radius: 999px; background: #0A1626; color: #fff; font: 500 18px "JetBrains Mono", monospace; letter-spacing: .04em; }
@@ -37,32 +37,28 @@
 </div>
 <script src="assets/js/surface-engine.js"></script>
 <script>
+/* Social image: the real hero photo, driveway half pressure-washed (strips follow the slab joints). */
 (async function () {
-  await document.fonts.load("900 100px Archivo");
+  await document.fonts.load('900 100px Archivo');
   await document.fonts.ready;
-  const c = document.getElementById('c');
-  const eng = new GPSurface.Engine(c, { allowSoftware: true, preserve: true });
-  const t = eng.target(1200, 630);
-  eng.bake(t, 'concrete', 260, 2.2, [0.4, 0.2]);
-
-  // headline painted into the grime (reverse graffiti)
-  const tc = document.createElement('canvas'); tc.width = 1200; tc.height = 630;
-  const x = tc.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, 1200, 630);
-  x.fillStyle = '#fff'; x.font = "900 100px Archivo"; x.textBaseline = 'alphabetic';
-  if ('letterSpacing' in x) x.letterSpacing = '-5px';
-  const base = 168 + 100 * 0.86 * 0.8;
-  x.fillText('THE GOOD KIND', 64, base);
-  x.fillText("OF PRESSURE.", 64, base + 100 * 0.86);
-  eng.setText(t, tc);
-
-  // a right-hand slice already washed clean, with a ragged spray edge
-  const m = document.createElement('canvas'); m.width = 1200; m.height = 630;
-  const mx = m.getContext('2d'); mx.fillStyle = '#000'; mx.fillRect(0, 0, 1200, 630);
-  mx.fillStyle = '#fff'; mx.beginPath(); mx.moveTo(1200, 0);
-  for (let y = 0; y <= 630; y += 6) mx.lineTo(948 + Math.sin(y * 0.05) * 5 + Math.sin(y * 0.21) * 2.5 + (Math.random() - .5) * 3, y);
-  mx.lineTo(1200, 630); mx.closePath(); mx.fill();
-  eng.setMask(t, m);
-  eng.draw(t, { useMask: true, vig: 0.28, wetDark: 0.66 });
+  const S = GPSurface, c = document.getElementById('c');
+  const eng = new S.Engine(c, { allowSoftware: true, preserve: true });
+  const P = 'assets/img/photos/';
+  const [after, before] = await Promise.all([S.loadImage(P + 'hero-after-desktop.webp'), S.loadImage(P + 'hero-before-desktop.webp')]);
+  const pair = eng.pair(after, before, [0, 0.509, 0.98, 1]);
+  const crop = [0, 333, 3200, 1800], slab = [[1552, 1926], [3733, 2428], [1903, 1527], [2841, 1632]];
+  const H = S.homography(slab.map(([x, y]) => [(x - crop[0]) / crop[2], (y - crop[1]) / crop[3]]), [[0, 0], [1, 0], [0, 1], [1, 1]]);
+  const map = S.coverMap(1200, 630, pair.iw, pair.ih, 0.6, 1);
+  let a0 = 1e9, a1 = -1e9, c0 = -1e9, c1 = 1e9;
+  for (let gy = 0; gy <= 48; gy++) for (let gx = 0; gx <= 48; gx++) {
+    const ix = (gx / 48) * map[0] + map[2], iy = (gy / 48) * map[1] + map[3];
+    if (eng.maskAt(pair, ix, iy) < 0.3) continue;
+    const [u, v] = S.apply3(H, ix, iy);
+    a0 = Math.min(a0, u); a1 = Math.max(a1, u); c0 = Math.max(c0, v); c1 = Math.min(c1, v);
+  }
+  const m = S.invert3(H), um = (a0 + a1) / 2, vmap = [m[4], m[3] * um + m[5], m[7], m[6] * um + m[8]];
+  const Y = (v) => (vmap[0] * v + vmap[1]) / (vmap[2] * v + vmap[3]);
+  eng.draw(pair, 1200, 630, { map, H, sweep: [a0, a1, Y(c0), Y(c1)], vmap, rows: 5, prog: 2.62, margin: 0.04, time: 3, spray: 0.9, dry: 0.4, vig: 0.12 });
   document.body.dataset.ready = '1';
 })();
 </script>

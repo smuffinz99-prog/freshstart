@@ -30,6 +30,22 @@
   };
   /* ===================================================================== */
 
+  /* ============================== PHOTOS ==============================
+     Before/after photo pairs (WebP in assets/img/photos/).
+     Your own job photos: save them with the same file names, both shots
+     taken from the same spot. If you replace the hero photos, set slab
+     to null so the cleaning strips simply run across the screen.          */
+  const PHOTOS = {
+    path: 'assets/img/photos/',
+    sizes: [720, 1280], /* card + slider files: <name>-<before|after>-<size>.webp */
+    hero: {
+      desktop: { after: 'hero-after-desktop.webp', before: 'hero-before-desktop.webp', size: [1920, 1080], beforeRect: [0, 0.509, 0.98, 1], crop: [0, 333, 3200, 1800], focus: [0.6, 1] },
+      mobile: { after: 'hero-after-mobile.webp', before: 'hero-before-mobile.webp', size: [750, 1538], beforeRect: [0, 0.586, 1, 1], crop: [1720, 0, 1040, 2133], focus: [0.5, 1] },
+      /* one concrete slab in the original 3200x2133 photo: front-left, front-right, back-left, back-right (px) */
+      slab: [[1552, 1926], [3733, 2428], [1903, 1527], [2841, 1632]],
+    },
+  };
+
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -93,27 +109,49 @@
     const hero = $('.hero');
     if (!hero) return;
     const stage = $('.hero__stage', hero), glc = $('.hero__gl', hero), fxc = $('.hero__fx', hero);
-    const title = $('.hero__title', hero), fades = $$('.fade', hero), veil = $('.hero__veil', hero);
+    const fades = $$('.fade', hero), veil = $('.hero__veil', hero);
     const hud = $('.hud', hero), hudLabel = $('.hud__label', hero), hudPct = $('.hud__pct', hero);
     const scrolly = html.classList.contains('scrolly');
+    const variantFor = (w, h) => (w / h < 0.8 ? 'mobile' : 'desktop');
 
-    const fail = () => { html.classList.remove('gl', 'scrolly', 'gl-ready'); };
+    /* No WebGL: show the clean photo as a still. */
+    const fail = () => {
+      html.classList.remove('gl', 'scrolly', 'gl-ready');
+      const v = PHOTOS.hero[variantFor(stage.clientWidth || innerWidth, stage.clientHeight || innerHeight)];
+      stage.style.backgroundImage = `url(${PHOTOS.path + v.after})`;
+      stage.style.backgroundSize = 'cover';
+      stage.style.backgroundPosition = `${v.focus[0] * 100}% ${v.focus[1] * 100}%`;
+      hero.classList.add('hero--static');
+    };
+
+    /* Show the dirty photo straight away as plain CSS layers (clean shot + dirty strip on top, placed
+       exactly like the WebGL view), so slow connections never see an empty hero. WebGL fades in over it. */
+    const placeholder = () => {
+      if (html.classList.contains('gl-ready')) return;
+      const w = stage.clientWidth, h = stage.clientHeight;
+      const v = PHOTOS.hero[variantFor(w, h)], [iw, ih] = v.size, b = v.beforeRect;
+      const s = Math.max(w / iw, h / ih), W = iw * s, H = ih * s;
+      const ox = (w - W) * v.focus[0], oy = (h - H) * v.focus[1];
+      stage.style.backgroundImage = `url(${PHOTOS.path + v.before}), url(${PHOTOS.path + v.after})`;
+      stage.style.backgroundSize = `${(b[2] - b[0]) * W}px ${(b[3] - b[1]) * H}px, ${W}px ${H}px`;
+      stage.style.backgroundPosition = `${ox + b[0] * W}px ${oy + b[1] * H}px, ${ox}px ${oy}px`;
+    };
+
     if (!S || !html.classList.contains('gl')) { fail(); return; }
+    placeholder();
+    window.addEventListener('resize', debounce(placeholder, 120));
     let eng;
     try { eng = new S.Engine(glc); } catch (e) { fail(); return; }
     eng.onlost = fail;
 
-    // Wrap each headline word with a zero-size baseline marker so we can paint it into the grime.
-    $$('.ln', title).forEach((ln) => {
-      ln.innerHTML = ln.textContent.trim().split(/\s+/).map((w) => `<span class="w"><i class="bl"></i>${w}</span>`).join(' ');
-    });
-
     const st = {
-      w: 0, h: 0, dpr: 1, rows: 6, margin: 0, t: null,
+      w: 0, h: 0, dpr: 1, vname: '', v: null, pair: null, map: [1, 1, 0, 0], H: null, Hinv: null,
+      sweep: [0, 1, 0, 1], vmap: [0, 0, 0, 1], rows: 5, margin: 0.04,
       pT: 0, pS: 0, clean: 0, spray: 0, dry: 0, shine: -2, shineT: -1,
-      reveal: reduced ? 1 : 0, revealStart: 0, textReady: false, mask: null, mw: 0, mh: 0,
       time: 0, visible: true, needs: true, done: false, io: -1, fxLive: false,
+      q: 2, fAcc: 0, fN: 0, pk: 1,
     };
+    const perf = /[?&]perf=1/.test(location.search) ? (window.__gpFrames = []) : null;
     const fx = fxc.getContext('2d');
     let fxDpr = 1;
     const parts = [], mists = [];
@@ -124,107 +162,106 @@
       x.fillStyle = g; x.fillRect(0, 0, 128, 128); return c;
     })();
 
-    let fontsReady = false;
-    const fontSpec = () => { const cs = getComputedStyle(title); return `${cs.fontWeight} 100px ${cs.fontFamily.split(',')[0]}`; };
+    async function loadVariant(name) {
+      if (st.vname === name) return;
+      st.vname = name;
+      const v = PHOTOS.hero[name];
+      try {
+        const [after, before] = await Promise.all([S.loadImage(PHOTOS.path + v.after), S.loadImage(PHOTOS.path + v.before)]);
+        if (st.vname !== name) return;
+        if (st.pair) eng.release(st.pair);
+        st.pair = eng.pair(after, before, v.beforeRect);
+        st.v = v;
+        if (PHOTOS.hero.slab && v.crop) {
+          const [cx, cy, cw, ch] = v.crop;
+          st.H = S.homography(PHOTOS.hero.slab.map(([x, y]) => [(x - cx) / cw, (y - cy) / ch]), [[0, 0], [1, 0], [0, 1], [1, 1]]);
+          st.Hinv = S.invert3(st.H);
+        } else { st.H = st.Hinv = null; }
+        layout();
+      } catch (e) { fail(); }
+    }
+
+    /* Fit the photo to the screen and work out how far the cleaning strips need to reach. */
+    function layout() {
+      const p = st.pair;
+      if (!p) return;
+      st.map = S.coverMap(st.w, st.h, p.iw, p.ih, st.v.focus[0], st.v.focus[1]);
+      if (st.H) {
+        let a0 = 1e9, a1 = -1e9, c0 = -1e9, c1 = 1e9;
+        for (let gy = 0; gy <= 48; gy++) for (let gx = 0; gx <= 48; gx++) {
+          const ix = (gx / 48) * st.map[0] + st.map[2], iy = (gy / 48) * st.map[1] + st.map[3];
+          if (eng.maskAt(p, ix, iy) < 0.3) continue;
+          const [u, v] = S.apply3(st.H, ix, iy);
+          a0 = Math.min(a0, u); a1 = Math.max(a1, u); c0 = Math.max(c0, v); c1 = Math.min(c1, v);
+        }
+        if (!(a1 > a0)) { a0 = 0; a1 = 1; c0 = 1; c1 = 0; }
+        /* strips follow the driveway joints but are spaced evenly on screen,
+           starting at the garage and working towards you */
+        const m = st.Hinv, um = (a0 + a1) / 2;
+        st.vmap = [m[4], m[3] * um + m[5], m[7], m[6] * um + m[8]];
+        const Y = (v) => (st.vmap[0] * v + st.vmap[1]) / (st.vmap[2] * v + st.vmap[3]);
+        st.sweep = [a0, a1, Y(c0), Y(c1)];
+        st.rows = 5;
+      } else {
+        st.sweep = [0, 1, 0, 1];
+        st.rows = clamp(Math.round(st.h / (st.w < 700 ? 130 : 150)), 4, 8);
+      }
+      st.needs = true;
+    }
 
     function size(force) {
       const w = stage.clientWidth, h = stage.clientHeight;
       if (!w || !h) return;
-      if (!force && st.t && Math.abs(w - st.w) < 2 && Math.abs(h - st.h) < 2) return;
+      if (!force && st.w && Math.abs(w - st.w) < 2 && Math.abs(h - st.h) < 2) return;
       st.w = w; st.h = h;
       const mobile = w < 700;
-      let dpr = Math.min(window.devicePixelRatio || 1, mobile ? 2 : 1.6);
-      const cap = Math.min(eng.maxTex, 4096);
-      dpr = Math.min(dpr, cap / w, cap / h, Math.sqrt(5.4e6 / (w * h)));
+      const caps = mobile ? [1, 1.3, 1.75] : [1, 1.2, 1.5];
+      let dpr = Math.min(window.devicePixelRatio || 1, caps[st.q]);
+      dpr = Math.min(dpr, eng.maxTex / w, eng.maxTex / h, Math.sqrt(4.5e6 / (w * h)));
       st.dpr = dpr;
-      const W = Math.round(w * dpr), H = Math.round(h * dpr);
-      glc.width = W; glc.height = H;
-      st.t = eng.target(W, H, st.t);
-      eng.bake(st.t, 'concrete', S.SETTINGS.concrete.ppm * dpr * (mobile ? 1.12 : 1), 1.0);
-      st.rows = clamp(Math.round(h / (mobile ? 128 : 150)), 4, 8);
-      st.margin = 70 * dpr;
+      glc.width = Math.round(w * dpr); glc.height = Math.round(h * dpr);
       fxDpr = Math.min(window.devicePixelRatio || 1, 1.5);
       fxc.width = Math.round(w * fxDpr); fxc.height = Math.round(h * fxDpr);
-      if (fontsReady) buildText();
+      const want = variantFor(w, h);
+      if (want !== st.vname) loadVariant(want); else layout();
       st.needs = true;
     }
 
-    function buildText() {
-      const t = st.t;
-      if (!t) return;
-      const c = document.createElement('canvas'); c.width = t.w; c.height = t.h;
-      const x = c.getContext('2d');
-      x.fillStyle = '#000'; x.fillRect(0, 0, c.width, c.height);
-      const cs = getComputedStyle(title);
-      x.font = `${cs.fontWeight} ${parseFloat(cs.fontSize) * st.dpr}px ${cs.fontFamily}`;
-      x.fillStyle = '#fff'; x.textBaseline = 'alphabetic';
-      const ls = (parseFloat(cs.letterSpacing) || 0) * st.dpr;
-      const native = 'letterSpacing' in x;
-      if (native) x.letterSpacing = ls + 'px';
-      const sr = stage.getBoundingClientRect();
-      const upper = cs.textTransform === 'uppercase';
-      $$('.w', title).forEach((w) => {
-        const r = w.firstElementChild.getBoundingClientRect();
-        const txt = upper ? w.textContent.toUpperCase() : w.textContent;
-        let px = (r.left - sr.left) * st.dpr;
-        const py = (r.top - sr.top) * st.dpr;
-        if (native || !ls) x.fillText(txt, px, py);
-        else for (const ch of txt) { x.fillText(ch, px, py); px += x.measureText(ch).width + ls; }
-      });
-      eng.setText(t, c);
-      // low-res copy so the intro spray knows where the letters are
-      const mw = 200, mh = Math.max(1, Math.round(200 * c.height / c.width));
-      const s = document.createElement('canvas'); s.width = mw; s.height = mh;
-      const sx = s.getContext('2d'); sx.drawImage(c, 0, 0, mw, mh);
-      st.mask = sx.getImageData(0, 0, mw, mh).data; st.mw = mw; st.mh = mh;
-      st.textReady = true; st.needs = true;
-    }
-
-    const onFonts = () => { if (fontsReady) return; fontsReady = true; buildText(); };
-    if (document.fonts && document.fonts.load) {
-      document.fonts.load(fontSpec()).then(onFonts, onFonts);
-      document.fonts.ready.then(() => { if (fontsReady) buildText(); else onFonts(); });
-    } else fontsReady = true;
-    setTimeout(onFonts, 3000);
-
-    /* nozzle position in CSS px */
-    function head() {
-      const prog = st.clean * st.rows;
-      const cur = Math.min(Math.floor(prog), st.rows - 1);
-      const f = prog - cur, dir = cur % 2 === 0 ? 1 : -1;
-      const m = st.margin / st.dpr, span = st.w + 2 * m;
-      const rowH = st.h / st.rows;
-      return { x: (dir > 0 ? f : 1 - f) * span - m, y0: cur * rowH, rowH, dir };
+    /* sweep coords (a along the strip, c across strips, both 0..1) -> screen px */
+    function toScreen(a, c) {
+      const u = st.sweep[0] + a * (st.sweep[1] - st.sweep[0]);
+      let v = st.sweep[2] + c * (st.sweep[3] - st.sweep[2]);
+      if (!st.H) return [u * st.w, v * st.h, u, v];
+      const [A, B, C, D] = st.vmap; v = (B - v * D) / (v * C - A);
+      const [ix, iy] = S.apply3(st.Hinv, u, v);
+      return [((ix - st.map[2]) / st.map[0]) * st.w, ((iy - st.map[3]) / st.map[1]) * st.h, ix, iy];
     }
 
     function emitSpray(dt) {
-      const n = st.spray * 640 * dt;
+      if (!st.pair) return;
+      const prog = st.clean * st.rows, cur = Math.min(Math.floor(prog), st.rows - 1), f = prog - cur;
+      const span = 1 + 2 * st.margin, dir = cur % 2 === 0 ? 1 : -1;
+      const a = (dir > 0 ? f : 1 - f) * span - st.margin;
+      const h0 = toScreen(a, (cur + 0.5) / st.rows);
+      if (st.H && eng.maskAt(st.pair, h0[2], h0[3]) < 0.25) return;
+      const top = toScreen(a, cur / st.rows), bot = toScreen(a, (cur + 1) / st.rows);
+      const ahead = toScreen(a + dir * 0.02, (cur + 0.5) / st.rows);
+      let dx = ahead[0] - h0[0], dy = ahead[1] - h0[1];
+      const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+      const rowPx = Math.hypot(bot[0] - top[0], bot[1] - top[1]);
+      const k = clamp(rowPx / 140, 0.35, 1.6); st.pk = k;
+      const n = st.spray * 560 * dt * k;
       const count = Math.floor(n) + (Math.random() < n % 1 ? 1 : 0);
-      if (!count) return;
-      const hd = head();
-      for (let i = 0; i < count && parts.length < 800; i++) {
-        const sp = 260 + Math.random() * 950, ang = (Math.random() - 0.5) * 1.35;
-        parts.push({
-          x: hd.x + hd.dir * Math.random() * 8, y: hd.y0 + hd.rowH * (0.08 + Math.random() * 0.84),
-          vx: hd.dir * Math.cos(ang) * sp, vy: Math.sin(ang) * sp * 0.75,
-          life: 0, max: 0.16 + Math.random() * 0.42, s: 0.6 + Math.random() * 1.7,
-        });
+      const cap = (st.w < 700 ? 300 : 650) * (st.q === 2 ? 1 : st.q === 1 ? 0.6 : 0.3);
+      for (let i = 0; i < count && parts.length < cap; i++) {
+        const t = 0.08 + Math.random() * 0.84;
+        const px = top[0] + (bot[0] - top[0]) * t, py = top[1] + (bot[1] - top[1]) * t;
+        const sp = (240 + Math.random() * 820) * k, ang = (Math.random() - 0.5) * 1.35;
+        const c = Math.cos(ang), s = Math.sin(ang);
+        parts.push({ x: px, y: py, vx: (dx * c - dy * s) * sp, vy: (dx * s + dy * c) * sp * 0.8, life: 0, max: 0.15 + Math.random() * 0.4, s: (0.5 + Math.random() * 1.5) * k });
       }
-      if (Math.random() < st.spray * dt * 16 && mists.length < 9) {
-        mists.push({ x: hd.x + hd.dir * (10 + Math.random() * 24), y: hd.y0 + hd.rowH * (0.15 + Math.random() * 0.7), r: 22 + Math.random() * 30, vx: hd.dir * (90 + Math.random() * 110), vy: (Math.random() - 0.5) * 24, life: 0, max: 0.3 + Math.random() * 0.35 });
-      }
-    }
-
-    function emitReveal() {
-      if (!st.mask) return;
-      const rv = st.reveal * 1.15 - 0.06;
-      for (let i = 0; i < 46 && parts.length < 800; i++) {
-        const yn = Math.random(), xn = (rv - yn * 0.18) / 0.82;
-        if (xn < 0 || xn > 1) continue;
-        const mx = Math.min(st.mw - 1, Math.floor(xn * st.mw)), my = Math.min(st.mh - 1, Math.floor(yn * st.mh));
-        if (st.mask[(my * st.mw + mx) * 4] < 110) continue;
-        const sp = 180 + Math.random() * 520, ang = (Math.random() - 0.5) * 2.2;
-        parts.push({ x: xn * st.w, y: yn * st.h, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * 0.7, life: 0, max: 0.14 + Math.random() * 0.3, s: 0.6 + Math.random() * 1.4 });
+      if (Math.random() < st.spray * dt * 14 && mists.length < 8) {
+        mists.push({ x: h0[0] + dx * 12 * k, y: h0[1] + dy * 12 * k, r: (22 + Math.random() * 28) * k, vx: dx * 110 * k, vy: dy * 110 * k, life: 0, max: 0.3 + Math.random() * 0.35 });
       }
     }
 
@@ -243,16 +280,24 @@
       fx.globalAlpha = 1;
       fx.lineCap = 'round';
       const drag = Math.pow(0.06, dt);
+      /* six batched paths (3 opacities x 2 widths) instead of one stroke per droplet */
+      const paths = [new Path2D(), new Path2D(), new Path2D(), new Path2D(), new Path2D(), new Path2D()];
+      let wsum = 0;
       for (let i = parts.length - 1; i >= 0; i--) {
         const p = parts[i];
         p.life += dt;
         if (p.life > p.max) { parts[i] = parts[parts.length - 1]; parts.pop(); continue; }
         p.vx *= drag; p.vy *= drag;
         p.x += p.vx * dt; p.y += p.vy * dt;
-        const a = 1 - p.life / p.max;
-        fx.strokeStyle = 'rgba(238,247,255,' + (a * 0.78).toFixed(3) + ')';
-        fx.lineWidth = p.s;
-        fx.beginPath(); fx.moveTo(p.x, p.y); fx.lineTo(p.x - p.vx * 0.018, p.y - p.vy * 0.018); fx.stroke();
+        const al = 1 - p.life / p.max, P = paths[(al > 0.66 ? 2 : al > 0.33 ? 1 : 0) * 2 + (p.s > 1.15 * st.pk ? 1 : 0)];
+        P.moveTo(p.x, p.y); P.lineTo(p.x - p.vx * 0.018, p.y - p.vy * 0.018);
+        wsum += p.s;
+      }
+      const avg = parts.length ? wsum / parts.length : 1;
+      for (let i = 0; i < 6; i++) {
+        fx.strokeStyle = ['rgba(238,247,255,.2)', 'rgba(238,247,255,.45)', 'rgba(238,247,255,.7)'][i >> 1];
+        fx.lineWidth = (i & 1 ? 1.45 : 0.7) * avg;
+        fx.stroke(paths[i]);
       }
       st.fxLive = parts.length > 0 || mists.length > 0;
     }
@@ -268,7 +313,7 @@
           el.style.visibility = io > 0.99 ? 'hidden' : '';
         });
       }
-      veil.style.setProperty('--veil', (1 - st.clean * 0.92).toFixed(3));
+      veil.style.setProperty('--veil', (st.done ? 1 : 1 - Math.min(1, st.clean * 3) * 0.75).toFixed(3));
       const pct = Math.round(st.clean * 100);
       if (pct !== lastPct) { lastPct = pct; hudPct.textContent = pct + '%'; hud.style.setProperty('--p', st.clean.toFixed(3)); }
       const c = st.clean;
@@ -281,8 +326,18 @@
     let raf = 0, last = performance.now();
     function frame(now) {
       raf = 0;
-      const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000));
+      const t0 = perf ? performance.now() : 0;
+      const raw = (now - last) / 1000;
+      const dt = Math.min(0.05, Math.max(0.001, raw));
       last = now;
+      /* auto quality: if this device can't keep up while cleaning, render fewer pixels */
+      if (st.spray > 0.05 && raw < 0.25) {
+        st.fAcc += raw; st.fN++;
+        if (st.fN >= 45) {
+          if (st.fAcc / st.fN > 0.027 && st.q > 0) { st.q--; size(true); }
+          st.fAcc = 0; st.fN = 0;
+        }
+      }
       st.time = (st.time + dt) % 600;
       size(false);
 
@@ -304,28 +359,23 @@
       } else { st.dry = Math.max(0, st.dry - dt * 2); st.shineT = -1; }
       if (st.shineT >= 0 && st.shineT < 1.6) { st.shineT += dt; st.shine = -0.3 + st.shineT * 1.1; } else st.shine = -2;
 
-      let revealing = false;
-      if (st.textReady && st.reveal < 1) {
-        if (!st.revealStart) st.revealStart = now + 380;
-        const r = clamp((now - st.revealStart) / 1350, 0, 1);
-        st.reveal = r >= 1 ? 1 : easeInOut(r);
-        revealing = true;
-        if (now > st.revealStart && r < 1) emitReveal();
-      }
-
       ui();
       if (st.spray > 0) emitSpray(dt);
 
-      if (st.t && (st.needs || dC !== 0 || st.spray > 0 || revealing || (st.dry > 0 && st.dry < 1) || st.shine > -2)) {
-        eng.draw(st.t, {
-          prog: st.clean * st.rows, rows: st.rows, margin: st.margin, time: st.time, spray: st.spray,
-          textReveal: st.reveal, dry: st.dry, shine: st.shine, wetDark: S.SETTINGS.concrete.wetDark, vig: 0.32,
+      if (st.pair && (st.needs || dC !== 0 || st.spray > 0 || (st.dry > 0 && st.dry < 1) || st.shine > -2)) {
+        eng.draw(st.pair, glc.width, glc.height, {
+          map: st.map, H: st.H, sweep: st.sweep, vmap: st.vmap, prog: st.clean * st.rows, rows: st.rows, margin: st.margin,
+          time: st.time, spray: st.spray, dry: st.dry, shine: st.shine, wetDark: 0.64, vig: 0.16, full: reduced ? 1 : 0,
         });
         st.needs = false;
-        if (!html.classList.contains('gl-ready')) html.classList.add('gl-ready');
+        if (!html.classList.contains('gl-ready')) {
+          html.classList.add('gl-ready');
+          /* the CSS placeholder is now hidden: drop it so the phone can free those decoded images */
+          setTimeout(() => { if (html.classList.contains('gl-ready')) stage.style.backgroundImage = 'none'; }, 1200);
+        }
       }
       if (st.fxLive || parts.length || mists.length) drawFx(dt);
-
+      if (perf && st.spray > 0) perf.push(performance.now() - t0);
       if (st.visible) raf = requestAnimationFrame(frame);
     }
 
@@ -340,71 +390,140 @@
   }
 
   /* --------------------------------------------------------------- service cards */
-  function initCards() {
-    const cards = $$('[data-surface-card]');
-    if (!cards.length) return;
-    const eng = S && html.classList.contains('gl') ? S.shared() : null;
-    if (!eng) { document.body.classList.add('no-surface'); return; }
+  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp`;
+  const photoSize = (cssW) => (cssW * Math.min(window.devicePixelRatio || 1, 2) <= 760 ? PHOTOS.sizes[0] : PHOTOS.sizes[1]);
 
-    const items = cards.map((el, i) => ({
-      el, canvas: $('canvas', el), meter: $('.svc__meter', el), mat: el.dataset.surface,
-      seed: 1.7 + i * 2.31, p: 0, pS: 0, spray: 0, dry: 0, t: null, ctx: null, visible: false, need: true,
+  function initCards() {
+    const cards = $$('.svc[data-photo]');
+    if (!cards.length) return;
+    const items = cards.map((el) => ({
+      el, media: $('.svc__media', el), canvas: $('canvas', el), meter: $('.svc__meter', el), name: el.dataset.photo,
+      vertical: el.dataset.vertical === '1', target: 0, pS: 0, spray: 0, dry: 0, imgA: null, imgB: null,
+      loading: false, done: false, visible: false, ctx: null, cw: 0, ch: 0, crop: null, need: true, dpr: 1,
     }));
-    let raf = 0, last = 0, time = 0;
+    const still = (it) => {
+      it.media.style.backgroundImage = `url(${photoUrl(it.name, 'after', photoSize(it.media.clientWidth))})`;
+      it.media.classList.add('is-static');
+    };
+    if (reduced) { items.forEach(still); return; }
+
+    let raf = 0, last = 0;
     const kick = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(loop); } };
-    const io = new IntersectionObserver((es) => es.forEach((e) => {
+    async function load(it) {
+      if (it.loading || it.imgA || it.done) return;
+      it.loading = true;
+      const sz = photoSize(it.media.clientWidth);
+      try {
+        const [a, b] = await Promise.all([S.loadImage(photoUrl(it.name, 'after', sz)), S.loadImage(photoUrl(it.name, 'before', sz))]);
+        it.imgA = a; it.imgB = b; it.need = true; kick();
+      } catch (e) { still(it); it.done = true; }
+      it.loading = false;
+    }
+    const near = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) load(items.find((x) => x.el === e.target)); }), { rootMargin: '700px 0px' });
+    const vis = new IntersectionObserver((es) => es.forEach((e) => {
       const it = items.find((x) => x.el === e.target);
       it.visible = e.isIntersecting;
       if (it.visible) kick();
-    }), { rootMargin: '240px 0px' });
-    items.forEach((it) => io.observe(it.el));
+    }), { rootMargin: '60px 0px' });
+    items.forEach((it) => { near.observe(it.el); vis.observe(it.el); });
 
-    function prepare(it) {
-      const r = it.canvas.getBoundingClientRect();
+    function fit(it) {
+      const r = it.media.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const W = Math.max(2, Math.round(r.width * dpr)), H = Math.max(2, Math.round(r.height * dpr));
-      if (it.t && it.t.w === W && it.t.h === H) return dpr;
-      it.canvas.width = W; it.canvas.height = H;
-      it.ctx = it.canvas.getContext('2d');
-      it.t = eng.target(W, H, it.t);
-      eng.bake(it.t, it.mat, S.SETTINGS[it.mat].ppm * dpr, it.seed);
+      if (W === it.cw && H === it.ch) return;
+      it.canvas.width = it.cw = W; it.canvas.height = it.ch = H; it.dpr = dpr;
+      it.ctx = it.canvas.getContext('2d', { alpha: false });
+      it.ctx.imageSmoothingQuality = 'high';
+      /* cover-fit crop of the photo */
+      const iw = it.imgA.naturalWidth, ih = it.imgA.naturalHeight, s = Math.max(W / iw, H / ih);
+      const sw = W / s, sh = H / s;
+      it.crop = [(iw - sw) / 2, (ih - sh) / 2, sw, sh];
       it.need = true;
-      return dpr;
+    }
+
+    /* One frame: dirty photo, then the clean photo revealed in back-and-forth strips with a soft spray edge,
+       a wet sheen behind the nozzle and a foam line at the edge. Plain 2D canvas, cheap on every phone. */
+    function paint(it) {
+      const { ctx, cw, ch, crop } = it;
+      const img = (im) => ctx.drawImage(im, crop[0], crop[1], crop[2], crop[3], 0, 0, cw, ch);
+      ctx.globalAlpha = 1;
+      if (it.pS >= 0.9999) { img(it.imgA); }
+      else {
+        img(it.imgB);
+        if (it.pS > 0) {
+          const rows = 4, vert = it.vertical, L = vert ? ch : cw, A = vert ? cw : ch, rowA = A / rows;
+          const margin = L * 0.06, span = L + 2 * margin, total = it.pS * rows;
+          const cur = Math.min(Math.floor(total), rows - 1), f = total - cur, dir = cur % 2 === 0 ? 1 : -1;
+          const head = (dir > 0 ? f : 1 - f) * span - margin, F = 9 * it.dpr;
+          const rect = (path, a0, a1, c0, c1) => (vert ? path.rect(c0, a0, c1 - c0, a1 - a0) : path.rect(a0, c0, a1 - a0, c1 - c0));
+          /* solid part: finished strips + current strip up to just behind the edge */
+          ctx.save(); ctx.beginPath();
+          if (cur > 0) rect(ctx, -2, L + 2, -2, cur * rowA);
+          const s0 = dir > 0 ? -2 : head + F, s1 = dir > 0 ? head - F : L + 2;
+          if (s1 > s0) rect(ctx, s0, s1, cur * rowA, (cur + 1) * rowA + (cur === rows - 1 ? 2 : 0));
+          ctx.clip(); img(it.imgA); ctx.restore();
+          /* feathered spray edge */
+          for (let k = 0; k < 4; k++) {
+            const e0 = head - F + (k * 2 * F) / 4, e1 = e0 + (2 * F) / 4;
+            const b0 = dir > 0 ? e0 : 2 * head - e1, b1 = dir > 0 ? e1 : 2 * head - e0;
+            ctx.save(); ctx.globalAlpha = 0.8 - k * 0.2; ctx.beginPath(); rect(ctx, b0, b1, cur * rowA, (cur + 1) * rowA); ctx.clip(); img(it.imgA); ctx.restore();
+          }
+          ctx.globalAlpha = 1;
+          /* wet sheen trailing the nozzle */
+          const wet = (1 - it.dry) * 0.24;
+          if (wet > 0.01) {
+            const back = head - dir * L * 0.75;
+            const g = vert ? ctx.createLinearGradient(0, head, 0, back) : ctx.createLinearGradient(head, 0, back, 0);
+            g.addColorStop(0, `rgba(12,22,18,${wet})`); g.addColorStop(1, 'rgba(12,22,18,0)');
+            ctx.fillStyle = g; ctx.beginPath();
+            rect(ctx, Math.min(head, back), Math.max(head, back), cur * rowA, (cur + 1) * rowA); ctx.fill();
+          }
+          /* foam at the edge while it's moving */
+          if (it.spray > 0.02) {
+            const g = vert ? ctx.createLinearGradient(0, head - F * 2, 0, head + F * 2) : ctx.createLinearGradient(head - F * 2, 0, head + F * 2, 0);
+            const al = 0.55 * it.spray;
+            g.addColorStop(0, 'rgba(240,248,255,0)'); g.addColorStop(0.5, `rgba(240,248,255,${al})`); g.addColorStop(1, 'rgba(240,248,255,0)');
+            ctx.fillStyle = g; ctx.beginPath(); rect(ctx, head - F * 2, head + F * 2, cur * rowA + rowA * 0.08, (cur + 1) * rowA - rowA * 0.08); ctx.fill();
+          }
+        }
+      }
     }
 
     function loop(now) {
       raf = 0;
       const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000));
-      last = now; time = (time + dt) % 600;
+      last = now;
       const vh = window.innerHeight;
       let any = false;
       items.forEach((it) => {
-        if (!it.visible) return;
+        if (!it.visible || !it.imgA || it.done) return;
         any = true;
-        const dpr = prepare(it);
+        fit(it);
         const r = it.el.getBoundingClientRect();
-        it.p = reduced ? 1 : clamp((vh * 0.9 - r.top) / (vh * 0.48), 0, 1);
+        /* one-way: once a card is clean it stays clean */
+        it.target = Math.max(it.target, clamp((vh * 0.9 - r.top) / (vh * 0.5), 0, 1));
         const prev = it.pS;
-        it.pS += (it.p - it.pS) * (1 - Math.exp(-dt * 5.5));
-        if (Math.abs(it.p - it.pS) < 0.0004) it.pS = it.p;
-        const d = it.pS - prev, cfg = S.SETTINGS[it.mat];
-        const tgt = d > 0 ? clamp((d / dt) * cfg.rows * 0.85, 0, 1) : 0;
+        it.pS += (it.target - it.pS) * (1 - Math.exp(-dt * 5));
+        if (Math.abs(it.target - it.pS) < 0.0004) it.pS = it.target;
+        const d = it.pS - prev;
+        const tgt = d > 0 ? clamp((d / dt) * 4 * 0.85, 0, 1) : 0;
         it.spray += (tgt - it.spray) * (1 - Math.exp(-dt * (tgt > it.spray ? 14 : 5)));
         if (it.spray < 0.004) it.spray = 0;
-        it.dry = it.pS >= 0.999 ? Math.min(1, it.dry + dt / 1.2) : Math.max(0, it.dry - dt * 2);
+        if (it.pS >= 0.9999) it.dry = Math.min(1, it.dry + dt / 1.1);
         if (it.need || d !== 0 || it.spray > 0 || (it.dry > 0 && it.dry < 1)) {
-          eng.blit(it.t, {
-            prog: it.pS * cfg.rows, rows: cfg.rows, vertical: cfg.vertical, margin: 26 * dpr, time,
-            spray: it.spray, dry: it.dry, wetDark: cfg.wetDark, vig: 0.36,
-          }, it.ctx);
+          paint(it);
           it.meter.style.setProperty('--p', it.pS.toFixed(3));
-          it.el.classList.toggle('is-clean', it.pS >= 0.999);
           it.need = false;
         }
+        if (it.dry >= 1) { it.done = true; it.el.classList.add('is-clean'); }
       });
       if (any) raf = requestAnimationFrame(loop);
     }
-    window.addEventListener('resize', debounce(kick, 150));
+    window.addEventListener('resize', debounce(() => {
+      items.forEach((it) => { if (it.imgA) { it.cw = 0; it.done = false; it.need = true; } });
+      kick();
+    }, 150));
   }
 
   /* --------------------------------------------------------------- before / after */
@@ -412,11 +531,9 @@
     const root = $('[data-ba]');
     if (!root) return;
     const frame = $('.ba__frame', root), div = $('.ba__divider', root);
-    const cB = $('.ba__img--before', root), cA = $('.ba__img--after', root);
     const pB = $('.ba__photo--before', root), pA = $('.ba__photo--after', root);
     const tabs = $$('[role="tab"]', root);
-    const eng = S && html.classList.contains('gl') ? S.shared() : null;
-    let split = 50, t = null, dragging = false, touched = false, started = false, startX = 0, startY = 0, decided = false, pointerType = '';
+    let split = 50, dragging = false, touched = false, started = false, startX = 0, startY = 0, decided = false, pointerType = '';
 
     const setSplit = (v) => {
       split = clamp(v, 0, 100);
@@ -427,26 +544,17 @@
 
     function render() {
       const tab = tabs.find((b) => b.getAttribute('aria-selected') === 'true') || tabs[0];
-      const mat = tab.dataset.surface;
-      if (tab.dataset.before && tab.dataset.after) {
-        pB.src = tab.dataset.before; pA.src = tab.dataset.after;
-        pB.alt = `${tab.textContent} before cleaning`; pA.alt = `${tab.textContent} after cleaning`;
-        pB.hidden = pA.hidden = false; cB.hidden = cA.hidden = true;
-        return;
-      }
-      pB.hidden = pA.hidden = true; cB.hidden = cA.hidden = false;
-      if (!eng) return;
-      const r = frame.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      let W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
-      const k = Math.min(1, 2200 / W);
-      W = Math.max(2, Math.round(W * k)); H = Math.max(2, Math.round(H * k));
-      t = eng.target(W, H, t);
-      const zoom = { concrete: 1.7, pavers: 1.15, tiles: 1.1, timber: 1.1, brick: 1.15 }[mat] || 1;
-      eng.bake(t, mat, S.SETTINGS[mat].ppm * dpr * k * zoom, 4.2);
-      cB.width = cA.width = W; cB.height = cA.height = H;
-      eng.blit(t, { full: -1, vig: 0.22, wetDark: 0.7 }, cB.getContext('2d'));
-      eng.blit(t, { full: 1, vig: 0.22, wetDark: 0.7 }, cA.getContext('2d'));
+      const sz = photoSize(frame.clientWidth);
+      const before = tab.dataset.before || photoUrl(tab.dataset.photo, 'before', sz);
+      const after = tab.dataset.after || photoUrl(tab.dataset.photo, 'after', sz);
+      frame.classList.add('is-loading');
+      let n = 0;
+      const ok = () => { if (++n === 2) frame.classList.remove('is-loading'); };
+      pB.onload = pA.onload = ok; pB.onerror = pA.onerror = ok;
+      pB.src = before; pA.src = after;
+      pB.alt = `${tab.textContent.trim()} before cleaning`; pA.alt = `${tab.textContent.trim()} after cleaning`;
+      /* warm the cache for the other tabs once this one is showing */
+      setTimeout(() => tabs.forEach((b) => { if (b !== tab && b.dataset.photo) { new Image().src = photoUrl(b.dataset.photo, 'before', sz); new Image().src = photoUrl(b.dataset.photo, 'after', sz); } }), 1500);
     }
 
     const pick = (i, focus) => {
@@ -497,7 +605,7 @@
 
     function teaser() {
       if (reduced || touched) return;
-      const keys = [[0, 50], [0.32, 24], [0.7, 76], [1, 50]], dur = 2600, t0 = performance.now();
+      const keys = [[0, 50], [0.32, 22], [0.7, 78], [1, 50]], dur = 2600, t0 = performance.now();
       const step = (now) => {
         if (touched) return;
         const k = clamp((now - t0) / dur, 0, 1);
@@ -510,14 +618,12 @@
     }
 
     const io = new IntersectionObserver((es) => {
-      if (!es[0].isIntersecting) return;
-      if (!started) { started = true; render(); setTimeout(teaser, 500); }
-    }, { rootMargin: '300px 0px', threshold: 0 });
+      if (!es[0].isIntersecting || started) return;
+      started = true; render();
+      const seen = new IntersectionObserver((es2) => { if (es2[0].isIntersecting) { seen.disconnect(); setTimeout(teaser, 400); } }, { threshold: 0.6 });
+      seen.observe(frame);
+    }, { rootMargin: '500px 0px' });
     io.observe(frame);
-    const seen = new IntersectionObserver((es) => { if (es[0].isIntersecting && started) { seen.disconnect(); } }, { threshold: 0.6 });
-    seen.observe(frame);
-    let lastW = 0;
-    window.addEventListener('resize', debounce(() => { const w = frame.clientWidth; if (started && Math.abs(w - lastW) > 4) { lastW = w; render(); } }, 200));
     setSplit(50);
   }
 

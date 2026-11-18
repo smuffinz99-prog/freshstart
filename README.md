@@ -2,9 +2,13 @@
 
 A one-page static site for **Good Pressure**, a pressure washing and soft washing business ("The good kind of pressure.").
 
-The centrepiece is the hero. The page opens on a filthy concrete driveway with the headline pressure-washed into the grime (reverse graffiti). As you scroll, a spray nozzle cleans it row by row, leaving a wet sheen and flying droplets, until it's spotless. Every service card cleans itself as it scrolls into view: pebblecrete, terracotta roof, brick, merbau deck, solar panels and pavers. All of those surfaces are drawn procedurally with WebGL, so there are no images to load or license.
+The centrepiece is the hero: a real photo of a house with a filthy driveway. As you scroll, a pressure-washer pass cleans it strip by strip, following the slab joints in perspective, with a wet sheen, foam and flying droplets, until it's spotless. Every service card does the same with its own before/after photo pair (driveway, roof tiles, brick wall, deck, solar panels, pavers), and the before & after slider uses the same photos.
+
+> **The photos are placeholders.** They're free stock photos (credits in [CREDITS.md](CREDITS.md)), and the "before" versions have dirt added digitally. Swap in real photos of your own jobs before launch. It's one command per surface, see [Add your own photos](#add-your-own-photos).
 
 No build step and no dependencies. Plain HTML, CSS and JS, so it can be hosted anywhere for free.
+
+**Built for phones:** about 300 KB loads before the hero is ready (images are WebP, sized per device). Everything below the hero loads as you scroll. The hero drops its render resolution automatically on slow phones, the service cards use plain 2D canvas, and visitors without WebGL or with reduced motion get still photos.
 
 ## Live preview
 
@@ -22,9 +26,12 @@ Because the preview is public before the real details are in, it has three previ
 | --- | --- |
 | `index.html` | The whole site: hero, services, method/PSI gauge, before & after, process, instant estimate, reviews, service area, FAQ, quote form, footer |
 | `assets/css/styles.css` | All styles. Brand colours are the variables at the top (`--ink`, `--aqua` ...) |
-| `assets/js/surface-engine.js` | WebGL engine that draws the dirty and clean surfaces and the cleaning sweep |
-| `assets/js/app.js` | Page behaviour. **`CONFIG` at the top holds the form delivery setting and the estimator prices** |
+| `assets/js/surface-engine.js` | WebGL engine for the hero: reveals the clean photo over the dirty one with the pressure-washer pass |
+| `assets/js/app.js` | Page behaviour. **`CONFIG` at the top holds the form delivery setting and the estimator prices; `PHOTOS` holds the photo setup** |
+| `assets/img/photos/` | The before/after photo pairs (WebP): `<slot>-<before\|after>-<720\|1280>.webp`, plus the hero's desktop and mobile versions |
+| `tools/photos.js` | Converts your own before/after photos into those files: `node tools/photos.js deck before.jpg after.jpg` |
 | `assets/img/` | Logo SVGs and PNGs, favicons, app icons, social share image |
+| `CREDITS.md` | Who took the placeholder photos |
 | `brand.html` | Brand sheet: logo versions, colours, type and voice (not linked from the site) |
 | `og.html` + `tools/make-assets.js` | Re-render the PNG logos, icons and social image after any brand change: `node tools/make-assets.js` |
 | `privacy.html`, `404.html`, `robots.txt`, `sitemap.xml`, `site.webmanifest` | The usual supporting files |
@@ -39,6 +46,7 @@ Search the project for each of these and swap in the real details:
 - [ ] **ABN**: `ABN 00 000 000 000` in the footer
 - [ ] **City and suburbs**: the site says **Brisbane**. Change it in the hero eyebrow, `<title>`, meta description, structured data, the service-area section, the FAQ ("Brisbane's humidity") and the footer. Swap in your real suburb list.
 - [ ] **Prices**: card "From $..." prices in `index.html` and the estimator prices in `CONFIG.services` (`app.js`). These are realistic starting points for AU, not quotes.
+- [ ] **Photos**: every before/after pair is a stock photo with digitally added dirt. Replace them with your own jobs (see below). Showing stock photos as your own results would be misleading.
 - [ ] **Reviews**: the three reviews are **samples** and are hidden on the preview. Replace them with real ones, with the customer's OK, then unhide the section. Publishing invented reviews is misleading conduct under the Australian Consumer Law, and the ACCC does act on it.
 - [ ] **Search visibility**: delete the two `PREVIEW ONLY` noindex lines (see Live preview above).
 - [ ] **Insurance and guarantee**: the site says "fully insured" and promises free re-cleans within 7 days. Only keep those if they're true for you.
@@ -53,17 +61,19 @@ Search the project for each of these and swap in the real details:
 
 Formspree works too: put the form URL in `CONFIG.formEndpoint`.
 
-### Add real before & after photos
+### Add your own photos
 
-The before & after slider uses rendered surfaces until you have job photos. For any tab, add the two photos to `assets/img/jobs/` and put them on the tab button:
+Real before/after photos of your own work are the most persuasive thing on this page, and the cleaning effect works with any pair.
 
-```html
-<button role="tab" ... data-surface="concrete"
-        data-before="assets/img/jobs/driveway-before.jpg"
-        data-after="assets/img/jobs/driveway-after.jpg">Driveway</button>
-```
+1. **Shoot the pair.** Before you start, take a photo. When you're done, stand in exactly the same spot and take the same shot again. Landscape works best for everything except the hero. Clean the lens, and shoot in shade or overcast light if you can so the two shots match.
+2. **Convert them** (needs Node and Edge or Chrome, both already on this PC):
+   ```
+   node tools/photos.js driveway before.jpg after.jpg
+   ```
+   Slots: `driveway`, `roof`, `brick`, `deck`, `pavers`, `solar` (the service cards and slider tabs) and `hero`. Each run writes the WebP files into `assets/img/photos/` under the names the site already uses. Nothing else to change.
+3. **Hero only:** the tool prints a small change to make in `PHOTOS.hero` in `app.js`: switch the strips from "follow the driveway joints" to "run straight across".
 
-Take both shots from the same spot, same angle, landscape. Real photos of your own work are the most persuasive thing you can put on this page.
+If you want the slider to show a different photo pair to its card, put the files anywhere and add `data-before="..." data-after="..."` to that tab button in `index.html`.
 
 ## Domain
 
@@ -94,7 +104,8 @@ This repo already deploys to GitHub Pages. Once you own the domain:
 ## Tweaking the effects
 
 - **Hero scroll length**: `--hero-run` in `styles.css` (default `290vh` of scrolling).
-- **Number of cleaning passes, surface scale and wetness**: `SETTINGS` near the bottom of `surface-engine.js`.
-- **Surface look** (dirt colours, lichen, leaves, oil stains): the GLSL blocks under `MATERIALS` in `surface-engine.js`.
-- **Accessibility**: visitors who prefer reduced motion get a static hero, and devices without WebGL get a CSS fallback.
-- **Preview helpers**: add `?y=1200` (pixel offset) or `?to=pricing` (section id) to the URL to jump straight to a scroll position.
+- **Number of cleaning strips**: `st.rows` in `initHero` (`app.js`, default 5) and `rows = 4` in the card painter.
+- **Wet look and spray**: `wetDark` in the hero's draw call (lower is darker), and the particle counts in `emitSpray`.
+- **Hero strip direction**: `PHOTOS.hero.slab` is four corners of one concrete slab in the original photo, which lines the strips up with the joints. Set it to `null` and they run straight across the screen.
+- **Accessibility**: visitors who prefer reduced motion get still photos, and devices without WebGL get the clean photo with no effect.
+- **Preview helpers**: add `?y=1200` (pixel offset) or `?to=pricing` (section id) to the URL to jump to a scroll position. Add `?perf=1` and the hero logs its per-frame cost to `window.__gpFrames`.

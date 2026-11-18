@@ -30,6 +30,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
 <link rel="stylesheet" href="assets/css/styles.css">
+<link rel="preload" as="image" href="assets/img/photos/hero-before-mobile.webp" media="(max-aspect-ratio: 4/5)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/img/photos/hero-after-mobile.webp" media="(max-aspect-ratio: 4/5)">
+<link rel="preload" as="image" href="assets/img/photos/hero-before-desktop.webp" media="(min-aspect-ratio: 4/5)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/img/photos/hero-after-desktop.webp" media="(min-aspect-ratio: 4/5)">
 
 <script>
   /* Decide the hero mode before first paint so the page height never jumps. */
@@ -161,7 +165,7 @@
     <div class="hero__intro">
       <div class="wrap">
         <p class="hero__eyebrow fade"><span class="dot" aria-hidden="true"></span>Pressure &amp; soft washing · Brisbane</p>
-        <h1 class="hero__title" id="hero-title"><span class="ln">The good kind</span> <span class="ln">of pressure.</span></h1>
+        <h1 class="hero__title fade" id="hero-title"><span class="ln">The good kind</span> <span class="ln">of pressure.</span></h1>
         <p class="hero__lede fade">Driveways, roofs, walls and decks, blasted back to like-new. Upfront prices, fully insured, and a finish the neighbours will ask about.</p>
         <div class="hero__ctas fade">
           <a class="btn btn--primary" href="#quote">Get a free quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
@@ -172,12 +176,12 @@
 
     <div class="hero__outro">
       <div class="wrap">
-        <p class="hero__eyebrow hero__eyebrow--ink"><span class="tick" aria-hidden="true"><svg><use href="#i-check"/></svg></span>100% spotless</p>
+        <p class="hero__eyebrow"><span class="tick" aria-hidden="true"><svg><use href="#i-check"/></svg></span>100% spotless</p>
         <h2 class="hero__outro-title">Like the day it was poured.</h2>
-        <p class="hero__lede hero__lede--ink">That took a few seconds of scrolling. Ours takes a morning, and the clean lasts. Now picture the roof, the walls and the deck.</p>
+        <p class="hero__lede">That took a few seconds of scrolling. Ours takes a morning, and the clean lasts. Now picture the roof, the walls and the deck.</p>
         <div class="hero__ctas">
-          <a class="btn btn--ink" href="#quote">Book your clean <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--line" href="#services">See what we clean</a>
+          <a class="btn btn--primary" href="#quote">Book your clean <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--glass" href="#services">See what we clean</a>
         </div>
       </div>
     </div>
@@ -213,7 +217,7 @@
     </header>
 
     <div class="bento">
-      <article class="svc svc--wide rv" data-surface-card data-surface="aggregate">
+      <article class="svc svc--wide rv" data-photo="driveway">
         <div class="svc__media"><canvas aria-hidden="true"></canvas><span class="svc__chip">Pressure clean</span><span class="svc__meter" aria-hidden="true"><i></i></span></div>
         <div class="svc__body">
           <h3>Driveways &amp; concrete</h3>
@@ -222,7 +226,7 @@
         </div>
       </article>
 
-      <article class="svc svc--mid rv" style="--d:1" data-surface-card data-surface="tiles">
+      <article class="svc svc--mid rv" style="--d:1" data-photo="roof">
         <div class="svc__media"><canvas aria-hidden="true"></canvas><span class="svc__chip">Soft wash</span><span class="svc__meter" aria-hidden="true"><i></i></span></div>
         <div class="svc__body">
           <h3>Roof cleaning</h3>
@@ -231,7 +235,7 @@
         </div>
       </article>
 
-      <article class="svc rv" data-surface-card data-surface="brick">
+      <article class="svc rv" data-photo="brick" data-vertical="1">
         <div class="svc__media"><canvas aria-hidden="true"></canvas><span class="svc__chip">Soft wash</span><span class="svc__meter" aria-hidden="true"><i></i></span></div>
         <div class="svc__body">
           <h3>House washing</h3>
@@ -240,7 +244,7 @@
         </div>
       </article>
 
-      <article class="svc rv" style="--d:1" data-surface-card data-surface="timber">
+      <article class="svc rv" style="--d:1" data-photo="deck">
         <div class="svc__media"><canvas aria-hidden="true"></canvas><span class="svc__chip">Low pressure</span><span class="svc__meter" aria-hidden="true"><i></i></span></div>
         <div class="svc__body">
           <h3>Decks &amp; timber</h3>
@@ -249,7 +253,7 @@
         </div>
       </article>
 
-      <article class="svc rv" style="--d:2" data-surface-card data-surface="solar">
+      <article class="svc rv" style="--d:2" data-photo="solar">
         <div class="svc__media"><canvas aria-hidden="true"></canvas><span class="svc__chip">Pure water</span><span class="svc__meter" aria-hidden="true"><i></i></span></div>
         <div class="svc__body">
           <h3>Solar panels</h3>
@@ -258,7 +262,7 @@
         </div>
       </article>
 
-      <article class="svc svc--mid rv" data-surface-card data-surface="pavers">
+      <article class="svc svc--mid rv" data-photo="pavers">
         <div class="svc__media"><canvas aria-hidden="true"></canvas><span class="svc__chip">Pressure clean</span><span class="svc__meter" aria-hidden="true"><i></i></span></div>
         <div class="svc__body">
           <h3>Pavers &amp; patios</h3>
@@ -342,28 +346,27 @@
         <p class="eyebrow"><span></span>Before &amp; after</p>
         <h2>Drag. Gasp. Book.</h2>
       </div>
-      <p class="sec-head__lede">Pull the handle to compare. This is what a proper clean does, on every surface we touch.</p>
+      <p class="sec-head__lede">Pull the handle to compare. This is the difference a proper clean makes.</p>
     </header>
 
     <!--
-      Swap in real job photos: add data-before="assets/img/jobs/driveway-before.jpg" and
-      data-after="assets/img/jobs/driveway-after.jpg" to any tab button below.
-      Tabs without photos use the built-in rendered surfaces.
+      PLACEHOLDER PHOTOS: the clean shots are royalty-free stock photos (Pexels) and the
+      "before" versions have dirt added digitally. Replace them with your own job photos
+      before launch: save as assets/img/photos/<name>-before-720.webp / -1280.webp (and
+      -after-), or put data-before="..." data-after="..." on a tab button.
     -->
     <div class="ba rv" data-ba>
       <div class="ba__tabs" role="tablist" aria-label="Surface">
-        <button role="tab" type="button" aria-selected="true" data-surface="concrete">Driveway</button>
-        <button role="tab" type="button" aria-selected="false" data-surface="tiles">Roof</button>
-        <button role="tab" type="button" aria-selected="false" data-surface="brick">Walls</button>
-        <button role="tab" type="button" aria-selected="false" data-surface="timber">Deck</button>
-        <button role="tab" type="button" aria-selected="false" data-surface="pavers">Pavers</button>
-        <button role="tab" type="button" aria-selected="false" data-surface="solar">Solar</button>
+        <button role="tab" type="button" aria-selected="true" data-photo="driveway">Driveway</button>
+        <button role="tab" type="button" aria-selected="false" data-photo="roof">Roof</button>
+        <button role="tab" type="button" aria-selected="false" data-photo="brick">Walls</button>
+        <button role="tab" type="button" aria-selected="false" data-photo="deck">Deck</button>
+        <button role="tab" type="button" aria-selected="false" data-photo="pavers">Pavers</button>
+        <button role="tab" type="button" aria-selected="false" data-photo="solar">Solar</button>
       </div>
       <div class="ba__frame">
-        <canvas class="ba__img ba__img--before" aria-hidden="true"></canvas>
-        <canvas class="ba__img ba__img--after" aria-hidden="true"></canvas>
-        <img class="ba__photo ba__photo--before" alt="" hidden>
-        <img class="ba__photo ba__photo--after" alt="" hidden>
+        <img class="ba__photo ba__photo--before" alt="" decoding="async">
+        <img class="ba__photo ba__photo--after" alt="" decoding="async">
         <span class="ba__tag ba__tag--before">Before</span>
         <span class="ba__tag ba__tag--after">After</span>
         <div class="ba__divider" role="slider" tabindex="0" aria-label="Before and after comparison. Use arrow keys to move." aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50% after">
