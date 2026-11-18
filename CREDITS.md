@@ -25,3 +25,10 @@ The placeholder photos are from [Pexels](https://www.pexels.com/license/). The P
 | [Wet grey concrete wall](https://www.pexels.com/photo/8746913/) | Jorge Urosa |
 | [Abundance of stains](https://www.pexels.com/photo/18063447/) | Jessica Lewis |
 | [Rocky surface with lichen](https://www.pexels.com/photo/7717759/) | Marina Leonova |
+
+## Fonts
+
+Self-hosted in `assets/fonts/` under the SIL Open Font License 1.1 (licence texts alongside the files).
+
+- **Archivo** by The Archivo Project Authors (Omnibus-Type)
+- **JetBrains Mono** by The JetBrains Mono Project Authors

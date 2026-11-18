@@ -31,6 +31,7 @@ Because the preview is public before the real details are in, it has three previ
 | `assets/img/photos/` | The before/after photo pairs (WebP): `<slot>-<before\|after>-<720\|1280>.webp`, plus the hero's desktop and mobile versions |
 | `tools/photos.js` | Converts your own before/after photos into those files: `node tools/photos.js deck before.jpg after.jpg` |
 | `assets/img/` | Logo SVGs and PNGs, favicons, app icons, social share image |
+| `assets/fonts/` | Archivo and JetBrains Mono, self-hosted so the page doesn't wait on Google's servers (open font licence included) |
 | `CREDITS.md` | Who took the placeholder photos |
 | `brand.html` | Brand sheet: logo versions, colours, type and voice (not linked from the site) |
 | `og.html` + `tools/make-assets.js` | Re-render the PNG logos, icons and social image after any brand change: `node tools/make-assets.js` |

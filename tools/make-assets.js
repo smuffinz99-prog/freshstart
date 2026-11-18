@@ -75,7 +75,7 @@ function serve() {
   await open('/og.html', 1200, 630);
   for (let i = 0; i < 100; i++) { if (await evaluate('document.body.dataset.ready') === '1') break; await sleep(150); }
   await sleep(300);
-  save('og-image.png', (await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 1200, height: 630, scale: 1 } })).data);
+  save('og-image.jpg', (await send('Page.captureScreenshot', { format: 'jpeg', quality: 84, clip: { x: 0, y: 0, width: 1200, height: 630, scale: 1 } })).data);
 
   // Logos with transparent backgrounds
   await open('/brand.html', 1280, 900);
