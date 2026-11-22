@@ -30,8 +30,8 @@
     hero: {
       /* Straight-on concrete driveway in front of a garage door (Unsplash, see CREDITS.md). The 'before' is the same
          photo with real concrete grime, oil stains and wheel-path dirt added. */
-      desktop: { after: 'hero-after-desktop.webp?v=6', before: 'hero-before-desktop.webp?v=6', size: [1920, 1200], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
-      mobile: { after: 'hero-after-mobile.webp?v=6', before: 'hero-before-mobile.webp?v=6', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      desktop: { after: 'hero-after-desktop.webp?v=7', before: 'hero-before-desktop.webp?v=7', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      mobile: { after: 'hero-after-mobile.webp?v=7', before: 'hero-before-mobile.webp?v=7', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
       slab: null, /* strips sweep straight across the screen */
     },
   };
