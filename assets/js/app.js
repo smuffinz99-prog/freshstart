@@ -30,8 +30,8 @@
     hero: {
       /* Straight-on concrete driveway in front of a garage door (Unsplash, see CREDITS.md). The 'before' is the same
          photo with real concrete grime, oil stains and wheel-path dirt added. */
-      desktop: { after: 'hero-after-desktop.webp?v=7', before: 'hero-before-desktop.webp?v=7', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
-      mobile: { after: 'hero-after-mobile.webp?v=7', before: 'hero-before-mobile.webp?v=7', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      desktop: { after: 'hero-after-desktop.webp?v=8', before: 'hero-before-desktop.webp?v=8', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      mobile: { after: 'hero-after-mobile.webp?v=8', before: 'hero-before-mobile.webp?v=8', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
       slab: null, /* strips sweep straight across the screen */
     },
   };
@@ -379,7 +379,7 @@
   }
 
   /* --------------------------------------------------------------- before / after slider */
-  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp`;
+  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=8`;
   const photoSize = (cssW) => (cssW * Math.min(window.devicePixelRatio || 1, 2) <= 760 ? PHOTOS.sizes[0] : PHOTOS.sizes[1]);
 
   function initBA() {
