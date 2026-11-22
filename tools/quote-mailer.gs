@@ -59,3 +59,10 @@ function doGet() { return json_({ ok: true, service: 'FreshStart quote mailer' }
 
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function esc_(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+/** Run this once from the editor (pick "authorize" next to Debug, then Run) to grant Gmail permission.
+ *  On Google's approval screen tick "Select all" (or "Send email on your behalf").
+ *  It sends you a confirmation email so you know quotes will arrive. */
+function authorize() {
+  GmailApp.sendEmail(SEND_TO, 'FreshStart quote mailer is connected', 'Quote requests from your website will now arrive in this inbox, with photos attached.', { name: 'FreshStart website' });
+}
