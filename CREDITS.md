@@ -27,8 +27,8 @@ The placeholder photos are from [Pexels](https://www.pexels.com/license/). The P
 | [Wet grey concrete wall](https://www.pexels.com/photo/8746913/) | Jorge Urosa |
 | [Abundance of stains](https://www.pexels.com/photo/18063447/) | Jessica Lewis |
 | [Rocky surface with lichen](https://www.pexels.com/photo/7717759/) | Marina Leonova |
-| Hero + slider grime: black mould texture (Unsplash licence) | [A wall that has some dirt on it](https://unsplash.com/photos/IbNuthxvUM8) | Unsplash contributor |
-| Hero + slider grime: streak staining (Unsplash licence) | [Close-up of a textured concrete wall with dark stains](https://unsplash.com/photos/fx6Qku9rlro) | Unsplash contributor |
+| [A wall that has some dirt on it](https://unsplash.com/photos/IbNuthxvUM8): black mould for the hero and slider (Unsplash licence) | Unsplash contributor |
+| [Close-up of a textured concrete wall with dark stains](https://unsplash.com/photos/fx6Qku9rlro): streak staining for the hero and slider (Unsplash licence) | Unsplash contributor |
 
 ## Fonts
 
