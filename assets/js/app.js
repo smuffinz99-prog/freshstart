@@ -39,10 +39,11 @@
     path: 'assets/img/photos/',
     sizes: [720, 1280], /* card + slider files: <name>-<before|after>-<size>.webp */
     hero: {
-      desktop: { after: 'hero-after-desktop.webp', before: 'hero-before-desktop.webp', size: [1920, 1080], beforeRect: [0, 0.509, 0.98, 1], crop: [0, 333, 3200, 1800], focus: [0.6, 1] },
-      mobile: { after: 'hero-after-mobile.webp', before: 'hero-before-mobile.webp', size: [750, 1538], beforeRect: [0, 0.586, 1, 1], crop: [1720, 0, 1040, 2133], focus: [0.5, 1] },
-      /* one concrete slab in the original 3200x2133 photo: front-left, front-right, back-left, back-right (px) */
-      slab: [[1552, 1926], [3733, 2428], [1903, 1527], [2841, 1632]],
+      /* Australian weatherboard house (Unsplash, see CREDITS.md). The 'before' is the same photo with real grime
+         borrowed from the other before/after pairs. beforeRect = whole photo, so the roof, gates and driveway all clean. */
+      desktop: { after: 'hero-after-desktop.webp', before: 'hero-before-desktop.webp', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.42, 1] },
+      mobile: { after: 'hero-after-mobile.webp', before: 'hero-before-mobile.webp', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      slab: null, /* no slab joints to follow on this driveway: strips sweep across the screen */
     },
   };
 
@@ -51,21 +52,11 @@
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const html = document.documentElement;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const money = (n) => '$' + Math.round(n).toLocaleString('en-AU');
   const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
   const onScroll = (fn) => { let q = false; const run = () => { q = false; fn(); }; window.addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(run); } }, { passive: true }); fn(); };
   const S = window.GPSurface;
 
-  const ICONS = {
-    driveway: '<path d="M8 21l2.2-17h3.6L16 21"/><path d="M12 7.5v2M12 12.5v2M12 17.5v2"/>',
-    paths: '<rect x="3.5" y="15" width="6.5" height="5" rx="1.6"/><rect x="9" y="8.5" width="6.5" height="5" rx="1.6"/><rect x="14.5" y="3" width="6" height="4.5" rx="1.6"/>',
-    house: '<path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/>',
-    roof: '<path d="M2.5 14L12 5.5l9.5 8.5"/><path d="M7.2 10.2h9.6M5.2 12h13.6"/><path d="M5 14v6h14v-6"/>',
-    deck: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9.7h18M3 14.3h18M9 5v4.7M15 9.7v4.6M7 14.3V19"/>',
-    solar: '<path d="M4.5 17.5L7 6.5h13l-2.5 11z"/><path d="M5.7 12h13.1M10.6 6.5l-1.4 11M15.4 6.5L14 17.5"/><path d="M11 17.5v3M8.5 20.5h5"/>',
-  };
-  const icon = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
 
   /* --------------------------------------------------------------- nav */
   function initNav() {
@@ -389,144 +380,10 @@
     raf = requestAnimationFrame(frame);
   }
 
-  /* --------------------------------------------------------------- service cards */
+  /* --------------------------------------------------------------- before / after slider */
   const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp`;
   const photoSize = (cssW) => (cssW * Math.min(window.devicePixelRatio || 1, 2) <= 760 ? PHOTOS.sizes[0] : PHOTOS.sizes[1]);
 
-  function initCards() {
-    const cards = $$('.svc[data-photo]');
-    if (!cards.length) return;
-    const items = cards.map((el) => ({
-      el, media: $('.svc__media', el), canvas: $('canvas', el), meter: $('.svc__meter', el), name: el.dataset.photo,
-      vertical: el.dataset.vertical === '1', target: 0, pS: 0, spray: 0, dry: 0, imgA: null, imgB: null,
-      loading: false, done: false, visible: false, ctx: null, cw: 0, ch: 0, crop: null, need: true, dpr: 1,
-    }));
-    const still = (it) => {
-      it.media.style.backgroundImage = `url(${photoUrl(it.name, 'after', photoSize(it.media.clientWidth))})`;
-      it.media.classList.add('is-static');
-    };
-    if (reduced) { items.forEach(still); return; }
-
-    let raf = 0, last = 0;
-    const kick = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(loop); } };
-    async function load(it) {
-      if (it.loading || it.imgA || it.done) return;
-      it.loading = true;
-      const sz = photoSize(it.media.clientWidth);
-      try {
-        const [a, b] = await Promise.all([S.loadImage(photoUrl(it.name, 'after', sz)), S.loadImage(photoUrl(it.name, 'before', sz))]);
-        it.imgA = a; it.imgB = b; it.need = true; kick();
-      } catch (e) { still(it); it.done = true; }
-      it.loading = false;
-    }
-    const near = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) load(items.find((x) => x.el === e.target)); }), { rootMargin: '700px 0px' });
-    const vis = new IntersectionObserver((es) => es.forEach((e) => {
-      const it = items.find((x) => x.el === e.target);
-      it.visible = e.isIntersecting;
-      if (it.visible) kick();
-    }), { rootMargin: '60px 0px' });
-    items.forEach((it) => { near.observe(it.el); vis.observe(it.el); });
-
-    function fit(it) {
-      const r = it.media.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const W = Math.max(2, Math.round(r.width * dpr)), H = Math.max(2, Math.round(r.height * dpr));
-      if (W === it.cw && H === it.ch) return;
-      it.canvas.width = it.cw = W; it.canvas.height = it.ch = H; it.dpr = dpr;
-      it.ctx = it.canvas.getContext('2d', { alpha: false });
-      it.ctx.imageSmoothingQuality = 'high';
-      /* cover-fit crop of the photo */
-      const iw = it.imgA.naturalWidth, ih = it.imgA.naturalHeight, s = Math.max(W / iw, H / ih);
-      const sw = W / s, sh = H / s;
-      it.crop = [(iw - sw) / 2, (ih - sh) / 2, sw, sh];
-      it.need = true;
-    }
-
-    /* One frame: dirty photo, then the clean photo revealed in back-and-forth strips with a soft spray edge,
-       a wet sheen behind the nozzle and a foam line at the edge. Plain 2D canvas, cheap on every phone. */
-    function paint(it) {
-      const { ctx, cw, ch, crop } = it;
-      const img = (im) => ctx.drawImage(im, crop[0], crop[1], crop[2], crop[3], 0, 0, cw, ch);
-      ctx.globalAlpha = 1;
-      if (it.pS >= 0.9999) { img(it.imgA); }
-      else {
-        img(it.imgB);
-        if (it.pS > 0) {
-          const rows = 4, vert = it.vertical, L = vert ? ch : cw, A = vert ? cw : ch, rowA = A / rows;
-          const margin = L * 0.06, span = L + 2 * margin, total = it.pS * rows;
-          const cur = Math.min(Math.floor(total), rows - 1), f = total - cur, dir = cur % 2 === 0 ? 1 : -1;
-          const head = (dir > 0 ? f : 1 - f) * span - margin, F = 9 * it.dpr;
-          const rect = (path, a0, a1, c0, c1) => (vert ? path.rect(c0, a0, c1 - c0, a1 - a0) : path.rect(a0, c0, a1 - a0, c1 - c0));
-          /* solid part: finished strips + current strip up to just behind the edge */
-          ctx.save(); ctx.beginPath();
-          if (cur > 0) rect(ctx, -2, L + 2, -2, cur * rowA);
-          const s0 = dir > 0 ? -2 : head + F, s1 = dir > 0 ? head - F : L + 2;
-          if (s1 > s0) rect(ctx, s0, s1, cur * rowA, (cur + 1) * rowA + (cur === rows - 1 ? 2 : 0));
-          ctx.clip(); img(it.imgA); ctx.restore();
-          /* feathered spray edge */
-          for (let k = 0; k < 4; k++) {
-            const e0 = head - F + (k * 2 * F) / 4, e1 = e0 + (2 * F) / 4;
-            const b0 = dir > 0 ? e0 : 2 * head - e1, b1 = dir > 0 ? e1 : 2 * head - e0;
-            ctx.save(); ctx.globalAlpha = 0.8 - k * 0.2; ctx.beginPath(); rect(ctx, b0, b1, cur * rowA, (cur + 1) * rowA); ctx.clip(); img(it.imgA); ctx.restore();
-          }
-          ctx.globalAlpha = 1;
-          /* wet sheen trailing the nozzle */
-          const wet = (1 - it.dry) * 0.24;
-          if (wet > 0.01) {
-            const back = head - dir * L * 0.75;
-            const g = vert ? ctx.createLinearGradient(0, head, 0, back) : ctx.createLinearGradient(head, 0, back, 0);
-            g.addColorStop(0, `rgba(12,22,18,${wet})`); g.addColorStop(1, 'rgba(12,22,18,0)');
-            ctx.fillStyle = g; ctx.beginPath();
-            rect(ctx, Math.min(head, back), Math.max(head, back), cur * rowA, (cur + 1) * rowA); ctx.fill();
-          }
-          /* foam at the edge while it's moving */
-          if (it.spray > 0.02) {
-            const g = vert ? ctx.createLinearGradient(0, head - F * 2, 0, head + F * 2) : ctx.createLinearGradient(head - F * 2, 0, head + F * 2, 0);
-            const al = 0.55 * it.spray;
-            g.addColorStop(0, 'rgba(240,248,255,0)'); g.addColorStop(0.5, `rgba(240,248,255,${al})`); g.addColorStop(1, 'rgba(240,248,255,0)');
-            ctx.fillStyle = g; ctx.beginPath(); rect(ctx, head - F * 2, head + F * 2, cur * rowA + rowA * 0.08, (cur + 1) * rowA - rowA * 0.08); ctx.fill();
-          }
-        }
-      }
-    }
-
-    function loop(now) {
-      raf = 0;
-      const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000));
-      last = now;
-      const vh = window.innerHeight;
-      let any = false;
-      items.forEach((it) => {
-        if (!it.visible || !it.imgA || it.done) return;
-        any = true;
-        fit(it);
-        const r = it.el.getBoundingClientRect();
-        /* one-way: once a card is clean it stays clean */
-        it.target = Math.max(it.target, clamp((vh * 0.9 - r.top) / (vh * 0.5), 0, 1));
-        const prev = it.pS;
-        it.pS += (it.target - it.pS) * (1 - Math.exp(-dt * 5));
-        if (Math.abs(it.target - it.pS) < 0.0004) it.pS = it.target;
-        const d = it.pS - prev;
-        const tgt = d > 0 ? clamp((d / dt) * 4 * 0.85, 0, 1) : 0;
-        it.spray += (tgt - it.spray) * (1 - Math.exp(-dt * (tgt > it.spray ? 14 : 5)));
-        if (it.spray < 0.004) it.spray = 0;
-        if (it.pS >= 0.9999) it.dry = Math.min(1, it.dry + dt / 1.1);
-        if (it.need || d !== 0 || it.spray > 0 || (it.dry > 0 && it.dry < 1)) {
-          paint(it);
-          it.meter.style.setProperty('--p', it.pS.toFixed(3));
-          it.need = false;
-        }
-        if (it.dry >= 1) { it.done = true; it.el.classList.add('is-clean'); }
-      });
-      if (any) raf = requestAnimationFrame(loop);
-    }
-    window.addEventListener('resize', debounce(() => {
-      items.forEach((it) => { if (it.imgA) { it.cw = 0; it.done = false; it.need = true; } });
-      kick();
-    }, 150));
-  }
-
-  /* --------------------------------------------------------------- before / after */
   function initBA() {
     const root = $('[data-ba]');
     if (!root) return;
@@ -625,168 +482,6 @@
     }, { rootMargin: '500px 0px' });
     io.observe(frame);
     setSplit(50);
-  }
-
-  /* --------------------------------------------------------------- gauge */
-  function initGauge() {
-    const g = $('[data-gauge]');
-    if (!g) return;
-    const ticks = $('.gauge__ticks', g), needle = $('.gauge__needle', g), value = $('.gauge__value', g);
-    const num = $('.gauge__num', g), zoneName = $('.gauge__zone-name', g);
-    const mTitle = $('.gauge__method-title'), mNote = $('.gauge__method-note');
-    const chips = $$('.chip-btn');
-    const MAX = 4000, LEN = 754, A0 = -135, A1 = 135;
-    let markup = '';
-    for (let v = 0; v <= MAX; v += 250) {
-      const a = (A0 + (v / MAX) * (A1 - A0)) * Math.PI / 180, major = v % 1000 === 0;
-      const r1 = 137, r2 = major ? 119 : 128;
-      markup += `<line class="${major ? 'major' : ''}" x1="${(200 + r1 * Math.sin(a)).toFixed(1)}" y1="${(200 - r1 * Math.cos(a)).toFixed(1)}" x2="${(200 + r2 * Math.sin(a)).toFixed(1)}" y2="${(200 - r2 * Math.cos(a)).toFixed(1)}"/>`;
-      if (major) markup += `<text x="${(200 + 188 * Math.sin(a)).toFixed(1)}" y="${(200 - 188 * Math.cos(a)).toFixed(1)}">${v ? v / 1000 + 'k' : '0'}</text>`;
-    }
-    ticks.innerHTML = markup;
-
-    let cur = 0, idx = 0, auto = true, timer = 0, raf = 0;
-    const countTo = (to) => {
-      const from = cur, t0 = performance.now();
-      cancelAnimationFrame(raf);
-      const step = (now) => {
-        const k = clamp((now - t0) / 950, 0, 1), e = 1 - Math.pow(1 - k, 3);
-        cur = Math.round(from + (to - from) * e);
-        num.textContent = cur.toLocaleString('en-AU');
-        if (k < 1) raf = requestAnimationFrame(step);
-      };
-      raf = requestAnimationFrame(step);
-    };
-    const set = (i, user) => {
-      idx = i;
-      const b = chips[i], psi = +b.dataset.psi;
-      chips.forEach((c, j) => c.setAttribute('aria-pressed', String(j === i)));
-      needle.style.setProperty('--a', (A0 + (psi / MAX) * (A1 - A0)).toFixed(2) + 'deg');
-      value.style.strokeDashoffset = String(LEN * (1 - psi / MAX));
-      mTitle.textContent = b.dataset.method;
-      mNote.textContent = b.dataset.note;
-      zoneName.textContent = psi <= 600 ? 'Soft wash zone' : psi <= 2000 ? 'Medium pressure' : 'High pressure';
-      if (reduced) { cur = psi; num.textContent = psi.toLocaleString('en-AU'); } else countTo(psi);
-      if (user) { auto = false; clearInterval(timer); }
-    };
-    chips.forEach((c, i) => c.addEventListener('click', () => set(i, true)));
-    num.textContent = '0';
-    needle.style.setProperty('--a', A0 + 'deg');
-    const io = new IntersectionObserver((es) => {
-      const vis = es[0].isIntersecting;
-      clearInterval(timer);
-      if (!vis) return;
-      if (!g.dataset.started) { g.dataset.started = '1'; setTimeout(() => set(0), 200); }
-      if (auto && !reduced) timer = setInterval(() => { if (auto) set((idx + 1) % chips.length); }, 3300);
-    }, { threshold: 0.35 });
-    io.observe(g);
-  }
-
-  /* --------------------------------------------------------------- process water line */
-  function initSteps() {
-    const list = $('[data-steps]');
-    if (!list) return;
-    const steps = $$('.step', list);
-    onScroll(() => {
-      const r = list.getBoundingClientRect(), vh = window.innerHeight;
-      const fill = clamp((vh * 0.62 - r.top - 22) / (r.height - 44), 0, 1);
-      list.style.setProperty('--fill', fill.toFixed(4));
-      list.style.setProperty('--tip', fill > 0.001 && fill < 0.999 ? '1' : '0');
-      const y = r.top + 22 + fill * (r.height - 44);
-      steps.forEach((s) => s.classList.toggle('is-wet', s.getBoundingClientRect().top + 18 <= y));
-    });
-  }
-
-  /* --------------------------------------------------------------- estimator */
-  const estimate = { items: [], total: 0, lo: 0, hi: 0 };
-  function initEstimator() {
-    const root = $('[data-estimator]');
-    if (!root) return;
-    const opts = $('[data-est-options]', root), totalEl = $('[data-est-total]', root), rangeEl = $('[data-est-range]', root);
-    const lines = $('[data-est-lines]', root), save = $('[data-est-save]', root), cta = $('[data-est-cta]', root);
-    const state = {};
-    CONFIG.services.forEach((s) => { state[s.id] = { on: false, size: 0, count: s.count ? s.count.start : 0 }; });
-
-    opts.innerHTML = CONFIG.services.map((s) => {
-      const from = s.sizes ? s.sizes[0][1] : s.count.base + s.count.per * s.count.min;
-      const choose = s.sizes
-        ? s.sizes.map((z, i) => `<button class="size" type="button" data-size="${i}" aria-pressed="${i === 0}">${z[0]}</button>`).join('')
-        : `<label class="opt__range"><span class="opt__range-row"><span>Number of ${s.count.unit}</span><b data-count>${s.count.start}</b></span><input type="range" min="${s.count.min}" max="${s.count.max}" step="${s.count.step}" value="${s.count.start}" aria-label="Number of ${s.count.unit}"></label>`;
-      return `<div class="opt" data-id="${s.id}">
-        <button class="opt__toggle" type="button" aria-pressed="false">
-          <span class="opt__icon">${icon(s.icon)}</span>
-          <span class="opt__text"><span class="opt__name">${s.name}</span><span class="opt__from">from ${money(from)}</span></span>
-          <span class="opt__check" aria-hidden="true"><svg><use href="#i-check"/></svg></span>
-        </button>
-        <div class="opt__sizes" role="group" aria-label="${s.name} size">${choose}</div>
-      </div>`;
-    }).join('');
-
-    let shown = 0, raf = 0;
-    const animateTotal = (to) => {
-      const from = shown, t0 = performance.now();
-      cancelAnimationFrame(raf);
-      const step = (now) => {
-        const k = reduced ? 1 : clamp((now - t0) / 650, 0, 1), e = 1 - Math.pow(1 - k, 3);
-        shown = from + (to - from) * e;
-        totalEl.textContent = money(shown);
-        if (k < 1) raf = requestAnimationFrame(step);
-      };
-      raf = requestAnimationFrame(step);
-    };
-
-    function compute() {
-      let sum = 0;
-      estimate.items = [];
-      CONFIG.services.forEach((s) => {
-        const v = state[s.id];
-        if (!v.on) return;
-        let price, label;
-        if (s.sizes) { price = s.sizes[v.size][1]; label = `${s.name} · ${s.sizes[v.size][0]}`; }
-        else { price = s.count.base + s.count.per * v.count; label = `${s.name} · ${v.count} ${s.count.unit}`; }
-        sum += price;
-        estimate.items.push({ label, price, form: s.form });
-      });
-      const n = estimate.items.length;
-      const disc = n >= 2 ? sum * CONFIG.bundleDiscount : 0;
-      const total = sum - disc;
-      estimate.total = total;
-      estimate.lo = Math.floor((total * CONFIG.estimateSpread[0]) / 10) * 10;
-      estimate.hi = Math.ceil((total * CONFIG.estimateSpread[1]) / 10) * 10;
-      animateTotal(total);
-      rangeEl.textContent = n ? `Typical range ${money(estimate.lo)} to ${money(estimate.hi)}` : 'Pick a service to get started.';
-      lines.innerHTML = estimate.items.map((i) => `<li><span>${i.label}</span><span>${money(i.price)}</span></li>`).join('');
-      save.hidden = !disc;
-      if (disc) $('span', save).textContent = `Bundle discount: ${money(disc)} off`;
-    }
-
-    $$('.opt', opts).forEach((el) => {
-      const id = el.dataset.id, v = state[id], tog = $('.opt__toggle', el);
-      tog.addEventListener('click', () => {
-        v.on = !v.on;
-        el.classList.toggle('is-on', v.on);
-        tog.setAttribute('aria-pressed', String(v.on));
-        compute();
-      });
-      $$('.size', el).forEach((b) => b.addEventListener('click', () => {
-        v.size = +b.dataset.size;
-        $$('.size', el).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-        compute();
-      }));
-      const range = $('input[type="range"]', el);
-      if (range) range.addEventListener('input', () => { v.count = +range.value; $('[data-count]', el).textContent = range.value; compute(); });
-    });
-
-    cta.addEventListener('click', () => {
-      const form = $('#quote-form');
-      if (!form || !estimate.items.length) return;
-      const wanted = new Set(estimate.items.map((i) => i.form));
-      $$('input[name="services"]', form).forEach((c) => { if (wanted.has(c.value)) c.checked = true; });
-      const msg = form.elements.message;
-      const note = `Instant estimate: ${money(estimate.lo)} to ${money(estimate.hi)} for ${estimate.items.map((i) => i.label).join(', ')}.`;
-      if (!msg.value.includes('Instant estimate:')) msg.value = msg.value ? `${note}\n${msg.value}` : note;
-    });
-    compute();
   }
 
   /* --------------------------------------------------------------- FAQ */
@@ -910,7 +605,7 @@
 
   /* --------------------------------------------------------------- boot */
   function boot() {
-    [initNav, initReveal, initHero, initCards, initBA, initGauge, initSteps, initEstimator, initFAQ, initForm, initFooter, initDock].forEach((fn) => {
+    [initNav, initReveal, initHero, initBA, initFAQ, initForm, initFooter, initDock].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[freshstart]', fn.name, e); }
     });
     $$('[data-year]').forEach((el) => { el.textContent = String(new Date().getFullYear()); });

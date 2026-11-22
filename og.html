@@ -37,7 +37,7 @@
 </div>
 <script src="assets/js/surface-engine.js"></script>
 <script>
-/* Social image: the real hero photo, driveway half pressure-washed (strips follow the slab joints). */
+/* Social image: the real hero photo, half pressure-washed. */
 (async function () {
   await document.fonts.load('900 100px Archivo');
   await document.fonts.ready;
@@ -45,20 +45,9 @@
   const eng = new S.Engine(c, { allowSoftware: true, preserve: true });
   const P = 'assets/img/photos/';
   const [after, before] = await Promise.all([S.loadImage(P + 'hero-after-desktop.webp'), S.loadImage(P + 'hero-before-desktop.webp')]);
-  const pair = eng.pair(after, before, [0, 0.509, 0.98, 1]);
-  const crop = [0, 333, 3200, 1800], slab = [[1552, 1926], [3733, 2428], [1903, 1527], [2841, 1632]];
-  const H = S.homography(slab.map(([x, y]) => [(x - crop[0]) / crop[2], (y - crop[1]) / crop[3]]), [[0, 0], [1, 0], [0, 1], [1, 1]]);
-  const map = S.coverMap(1200, 630, pair.iw, pair.ih, 0.6, 1);
-  let a0 = 1e9, a1 = -1e9, c0 = -1e9, c1 = 1e9;
-  for (let gy = 0; gy <= 48; gy++) for (let gx = 0; gx <= 48; gx++) {
-    const ix = (gx / 48) * map[0] + map[2], iy = (gy / 48) * map[1] + map[3];
-    if (eng.maskAt(pair, ix, iy) < 0.3) continue;
-    const [u, v] = S.apply3(H, ix, iy);
-    a0 = Math.min(a0, u); a1 = Math.max(a1, u); c0 = Math.max(c0, v); c1 = Math.min(c1, v);
-  }
-  const m = S.invert3(H), um = (a0 + a1) / 2, vmap = [m[4], m[3] * um + m[5], m[7], m[6] * um + m[8]];
-  const Y = (v) => (vmap[0] * v + vmap[1]) / (vmap[2] * v + vmap[3]);
-  eng.draw(pair, 1200, 630, { map, H, sweep: [a0, a1, Y(c0), Y(c1)], vmap, rows: 5, prog: 2.62, margin: 0.04, time: 3, spray: 0.9, dry: 0.4, vig: 0.12 });
+  const pair = eng.pair(after, before, [0, 0, 1, 1]);
+  const map = S.coverMap(1200, 630, pair.iw, pair.ih, 0.42, 1);
+  eng.draw(pair, 1200, 630, { map, H: null, sweep: [0, 1, 0, 1], rows: 6, prog: 3.45, margin: 0.04, time: 3, spray: 0.9, dry: 0.4, vig: 0.12 });
   document.body.dataset.ready = '1';
 })();
 </script>

@@ -8,7 +8,9 @@ The placeholder photos are from [Pexels](https://www.pexels.com/license/). The P
 
 | Used for | Photo | Photographer |
 | --- | --- | --- |
-| Hero, driveway card, Driveway slider tab | [White and brown wooden house](https://www.pexels.com/photo/3935333/) | Curtis Adams |
+| Hero (Australian weatherboard house, Unsplash licence) | [A small white house with a blue roof](https://unsplash.com/photos/KsOcybpXxdI) | Paddy Pohlod |
+| About section (Hobart bungalow, Unsplash licence) | [A house with a white picket fence](https://unsplash.com/photos/QG_fW5GSEKs) | K8 |
+| Driveway card, Driveway slider tab | [White and brown wooden house](https://www.pexels.com/photo/3935333/) | Curtis Adams |
 | Roof card and tab | [Close-up of roof tiles](https://www.pexels.com/photo/27806149/) | Bunyamin Cicek |
 | House washing card, Walls tab | [Brown brick wall](https://www.pexels.com/photo/3816350/) | Magda Ehlers |
 | Decks card and tab | [Close-up of wooden deck](https://www.pexels.com/photo/36723272/) | Malcolm Garret |

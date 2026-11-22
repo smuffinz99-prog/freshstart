@@ -2,13 +2,13 @@
 
 A one-page static site for **FreshStart Pressure Washing**, a pressure washing and soft washing business ("A fresh start for every surface.").
 
-The centrepiece is the hero: a real photo of a house with a filthy driveway. As you scroll, a pressure-washer pass cleans it strip by strip, following the slab joints in perspective, with a wet sheen, foam and flying droplets, until it's spotless. Every service card does the same with its own before/after photo pair (driveway, roof tiles, brick wall, deck, solar panels, pavers), and the before & after slider uses the same photos.
+The centrepiece is the hero: a real photo of an Australian weatherboard house with a grimy roof, carport gates and driveway. As you scroll, a pressure-washer pass cleans it strip by strip, with a wet sheen, foam and flying droplets, until it's spotless. The service cards show plain clean photos, and the before & after slider uses the before/after pairs (driveway, roof tiles, brick wall, deck, solar panels, pavers).
 
 > **The photos are placeholders.** They're free stock photos (credits in [CREDITS.md](CREDITS.md)), and the "before" versions have dirt added digitally. Swap in real photos of your own jobs before launch. It's one command per surface, see [Add your own photos](#add-your-own-photos).
 
 No build step and no dependencies. Plain HTML, CSS and JS, so it can be hosted anywhere for free.
 
-**Built for phones:** about 300 KB loads before the hero is ready (images are WebP, sized per device). Everything below the hero loads as you scroll. The hero drops its render resolution automatically on slow phones, the service cards use plain 2D canvas, and visitors without WebGL or with reduced motion get still photos.
+**Built for phones:** about 300 KB loads before the hero is ready (images are WebP, sized per device). Everything below the hero loads as you scroll. The hero drops its render resolution automatically on slow phones, and visitors without WebGL or with reduced motion get still photos.
 
 ## Live preview
 
@@ -24,10 +24,10 @@ Because the preview is public before the real details are in, it has three previ
 
 | File | What it is |
 | --- | --- |
-| `index.html` | The whole site: hero, services, method/PSI gauge, before & after, process, instant estimate, reviews, service area, FAQ, quote form, footer |
+| `index.html` | The whole site: hero, about, services, why choose us, before & after, reviews (hidden), FAQ, quote form, footer |
 | `assets/css/styles.css` | All styles. Brand colours are the variables at the top (`--ink`, `--aqua` ...) |
 | `assets/js/surface-engine.js` | WebGL engine for the hero: reveals the clean photo over the dirty one with the pressure-washer pass |
-| `assets/js/app.js` | Page behaviour. **`CONFIG` at the top holds the form delivery setting and the estimator prices; `PHOTOS` holds the photo setup** |
+| `assets/js/app.js` | Page behaviour. **`CONFIG` at the top holds the form delivery setting; `PHOTOS` holds the photo setup** |
 | `assets/img/photos/` | The before/after photo pairs (WebP): `<slot>-<before\|after>-<720\|1280>.webp`, plus the hero's desktop and mobile versions |
 | `tools/photos.js` | Converts your own before/after photos into those files: `node tools/photos.js deck before.jpg after.jpg` |
 | `assets/img/` | Logo SVGs and PNGs, favicons, app icons, social share image |
@@ -44,11 +44,10 @@ Search the project for each of these and swap in the real details:
 
 - [ ] **Phone**: `0491 570 156` and `+61491570156` (`tel:` links, the structured data, and `CONFIG.phoneDisplay` in `app.js`)
 - [ ] **Email**: `freshstartpressurewashing11@gmail.com` (also `CONFIG.email` in `app.js`)
-- [ ] **About photo**: the About section reuses the stock house photo. Swap in a photo of you, your van or a real job (`index.html`, search for about__media).
+- [ ] **About photo**: the About section uses a stock photo of a Hobart bungalow. Swap in a photo of you, your van or a real job (`index.html`, search for about__media).
 - [x] **Hero stats**: 500+ jobs, 100% satisfaction, 10+ years (confirmed true by the owner 22 Nov 2026). Update the numbers as they grow (index.html, search for hero__stats).
 - [ ] **ABN**: `ABN 00 000 000 000` in the footer
-- [ ] **City and suburbs**: the site says **Brisbane**. Change it in the hero eyebrow, `<title>`, meta description, structured data, the service-area section, the FAQ ("Brisbane's humidity") and the footer. Swap in your real suburb list.
-- [ ] **Prices**: card "From $..." prices in `index.html` and the estimator prices in `CONFIG.services` (`app.js`). These are realistic starting points for AU, not quotes.
+- [ ] **City and suburbs**: the site says **Brisbane**. Change it in the hero eyebrow, `<title>`, meta description, structured data, the FAQ ("Brisbane's humidity") and the footer.
 - [ ] **Photos**: every before/after pair is a stock photo with digitally added dirt. Replace them with your own jobs (see below). Showing stock photos as your own results would be misleading.
 - [ ] **Reviews**: the three reviews are **samples** and are hidden on the preview. Replace them with real ones, with the customer's OK, then unhide the section. Publishing invented reviews is misleading conduct under the Australian Consumer Law, and the ACCC does act on it.
 - [ ] **Search visibility**: delete the two `PREVIEW ONLY` noindex lines (see Live preview above).
@@ -107,8 +106,8 @@ This repo already deploys to GitHub Pages. Once you own the domain:
 ## Tweaking the effects
 
 - **Hero scroll length**: `--hero-run` in `styles.css` (default `290vh` of scrolling).
-- **Number of cleaning strips**: `st.rows` in `initHero` (`app.js`, default 5) and `rows = 4` in the card painter.
+- **Number of cleaning strips**: `st.rows` in `initHero` (`app.js`).
 - **Wet look and spray**: `wetDark` in the hero's draw call (lower is darker), and the particle counts in `emitSpray`.
-- **Hero strip direction**: `PHOTOS.hero.slab` is four corners of one concrete slab in the original photo, which lines the strips up with the joints. Set it to `null` and they run straight across the screen.
+- **Hero strip direction**: `PHOTOS.hero.slab` can hold four corners of one concrete slab in the original photo to line the strips up with driveway joints. It is `null` for the current photo, so they run straight across the screen.
 - **Accessibility**: visitors who prefer reduced motion get still photos, and devices without WebGL get the clean photo with no effect.
-- **Preview helpers**: add `?y=1200` (pixel offset) or `?to=pricing` (section id) to the URL to jump to a scroll position. Add `?perf=1` and the hero logs its per-frame cost to `window.__gpFrames`.
+- **Preview helpers**: add `?y=1200` (pixel offset) or `?to=services` (section id) to the URL to jump to a scroll position. Add `?perf=1` and the hero logs its per-frame cost to `window.__gpFrames`.
