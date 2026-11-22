@@ -2,7 +2,7 @@
 
 The placeholder photos are from [Pexels](https://www.pexels.com/license/). The Pexels licence allows free commercial use and editing, and doesn't require attribution, but these photographers deserve the credit.
 
-**Important:** these are stock photos, not jobs done by Good Pressure. Each "after" image is the original photo. Each "before" image is the same photo with dirt, lichen and mould added digitally (using the texture photos further down). Replace them with real before/after photos of your own work before you launch. Presenting stock photos as your own results would be misleading. See "Add your own photos" in the README.
+**Important:** these are stock photos, not jobs done by FreshStart Pressure Washing. Each "after" image is the original photo. Each "before" image is the same photo with dirt, lichen and mould added digitally (using the texture photos further down). Replace them with real before/after photos of your own work before you launch. Presenting stock photos as your own results would be misleading. See "Add your own photos" in the README.
 
 ## Surfaces (used as the clean "after" shots)
 

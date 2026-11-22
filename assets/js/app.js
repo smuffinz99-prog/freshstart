@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Good Pressure — page behaviour
+   FreshStart Pressure Washing — page behaviour
    Edit CONFIG below for form delivery and estimator prices.
    ========================================================================== */
 (function () {
@@ -13,7 +13,7 @@
        Leave both empty and the form opens the visitor's email app instead. */
     web3formsKey: '',
     formEndpoint: '',
-    email: 'hello@goodpressure.com.au',
+    email: 'hello@freshstartpressurewashing.com.au',
     phoneDisplay: '0491 570 156',
 
     /* Estimator (AUD, GST incl.). First size = the "from" price. */
@@ -846,7 +846,7 @@
         if (CONFIG.web3formsKey) {
           const r = await fetch('https://api.web3forms.com/submit', {
             method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            body: JSON.stringify({ access_key: CONFIG.web3formsKey, subject: `New quote request: ${data.name} (${data.suburb})`, from_name: 'Good Pressure website', ...data }),
+            body: JSON.stringify({ access_key: CONFIG.web3formsKey, subject: `New quote request: ${data.name} (${data.suburb})`, from_name: 'FreshStart website', ...data }),
           });
           const j = await r.json();
           if (!j.success) throw new Error(j.message || 'send failed');
@@ -906,7 +906,7 @@
   /* --------------------------------------------------------------- boot */
   function boot() {
     [initNav, initReveal, initHero, initCards, initBA, initGauge, initSteps, initEstimator, initFAQ, initForm, initFooter, initDock].forEach((fn) => {
-      try { fn(); } catch (e) { console.error('[goodpressure]', fn.name, e); }
+      try { fn(); } catch (e) { console.error('[freshstart]', fn.name, e); }
     });
     $$('[data-year]').forEach((el) => { el.textContent = String(new Date().getFullYear()); });
     // Preview helpers: ?y=1200 scrolls to a pixel offset, ?to=pricing scrolls to a section.

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://goodpressure.com.au/sitemap.xml
+Sitemap: https://freshstartpressurewashing.com.au/sitemap.xml

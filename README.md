@@ -1,6 +1,6 @@
-# Good Pressure: pressure washing website
+# FreshStart Pressure Washing: pressure washing website
 
-A one-page static site for **Good Pressure**, a pressure washing and soft washing business ("The good kind of pressure.").
+A one-page static site for **FreshStart Pressure Washing**, a pressure washing and soft washing business ("A fresh start for every surface.").
 
 The centrepiece is the hero: a real photo of a house with a filthy driveway. As you scroll, a pressure-washer pass cleans it strip by strip, following the slab joints in perspective, with a wet sheen, foam and flying droplets, until it's spotless. Every service card does the same with its own before/after photo pair (driveway, roof tiles, brick wall, deck, solar panels, pavers), and the before & after slider uses the same photos.
 
@@ -12,7 +12,7 @@ No build step and no dependencies. Plain HTML, CSS and JS, so it can be hosted a
 
 ## Live preview
 
-**https://smuffinz99-prog.github.io/goodpressure/** is GitHub Pages from this repo's `main` branch. Every push to `main` redeploys it in about a minute.
+**https://smuffinz99-prog.github.io/freshstart/** is GitHub Pages from this repo's `main` branch. Every push to `main` redeploys it in about a minute.
 
 Because the preview is public before the real details are in, it has three preview-only settings. Undo them at launch:
 
@@ -43,7 +43,7 @@ Because the preview is public before the real details are in, it has three previ
 Search the project for each of these and swap in the real details:
 
 - [ ] **Phone**: `0491 570 156` and `+61491570156` (`tel:` links, the structured data, and `CONFIG.phoneDisplay` in `app.js`)
-- [ ] **Email**: `hello@goodpressure.com.au` (also `CONFIG.email` in `app.js`)
+- [ ] **Email**: `hello@freshstartpressurewashing.com.au` (also `CONFIG.email` in `app.js`)
 - [ ] **ABN**: `ABN 00 000 000 000` in the footer
 - [ ] **City and suburbs**: the site says **Brisbane**. Change it in the hero eyebrow, `<title>`, meta description, structured data, the service-area section, the FAQ ("Brisbane's humidity") and the footer. Swap in your real suburb list.
 - [ ] **Prices**: card "From $..." prices in `index.html` and the estimator prices in `CONFIG.services` (`app.js`). These are realistic starting points for AU, not quotes.
@@ -78,21 +78,21 @@ If you want the slider to show a different photo pair to its card, put the files
 
 ## Domain
 
-On 17 Nov 2026 the .au registry showed **goodpressure.com.au** and **goodpressure.au** as unregistered (`goodpressure.com` is taken).
+Check **freshstartpressurewashing.com.au** (and the shorter **freshstartpressure.com.au**) at a registrar such as VentraIP or Crazy Domains before you print anything. The site currently uses `freshstartpressurewashing.com.au` as a placeholder.
 
-- `.com.au` needs an ABN or a registered business name that matches or relates to the domain. Register "Good Pressure" as a business name with ASIC first, or alongside.
+- `.com.au` needs an ABN or a registered business name that matches or relates to the domain. Register "FreshStart Pressure Washing" as a business name with ASIC first, or alongside.
 - Register through any auDA-accredited registrar, for example VentraIP, Crazy Domains or GoDaddy AU. Expect roughly $20 to $40 a year.
-- It's worth grabbing `goodpressure.au` as well and forwarding it to the main domain.
+- It's worth grabbing `freshstartpressurewashing.au` as well and forwarding it to the main domain.
 
 ## Hosting (free): connecting your domain
 
 This repo already deploys to GitHub Pages. Once you own the domain:
 
-1. In the repo, go to Settings → Pages → Custom domain, enter `goodpressure.com.au` and save. GitHub commits a `CNAME` file. Tick **Enforce HTTPS** once it's offered (it can take up to an hour).
+1. In the repo, go to Settings → Pages → Custom domain, enter `freshstartpressurewashing.com.au` and save. GitHub commits a `CNAME` file. Tick **Enforce HTTPS** once it's offered (it can take up to an hour).
 2. At your registrar, add these DNS records:
    - four `A` records for `@`, pointing to `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and `185.199.111.153`
    - a `CNAME` for `www`, pointing to `smuffinz99-prog.github.io`
-3. The old `github.io/goodpressure` address redirects to your domain automatically, so links you've already shared keep working.
+3. The old `github.io/freshstart` address redirects to your domain automatically, so links you've already shared keep working.
 
 **Cloudflare Pages or Netlify** also work: drag and drop the folder, then add the custom domain in their dashboard.
 

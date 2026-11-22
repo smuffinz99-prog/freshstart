@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Good Pressure — photo cleaning engine (WebGL)
+   FreshStart Pressure Washing — photo cleaning engine (WebGL)
    Takes a BEFORE and AFTER photo of the same surface and reveals the clean
    one with a pressure-washer pass: back-and-forth strips with a soft spray
    edge, wet sheen behind the nozzle and foam at the cleaning line.

@@ -24,4 +24,4 @@ http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(buf);
   });
-}).listen(PORT, () => console.log('Good Pressure preview on http://localhost:' + PORT));
+}).listen(PORT, () => console.log('FreshStart Pressure Washing preview on http://localhost:' + PORT));
