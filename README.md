@@ -2,7 +2,7 @@
 
 A one-page static site for **FreshStart Pressure Washing**, a pressure washing and soft washing business ("A fresh start for every surface.").
 
-The centrepiece is the hero: a real photo of an Australian weatherboard house with a grimy roof, carport gates and driveway. As you scroll, a pressure-washer pass cleans it strip by strip, with a wet sheen, foam and flying droplets, until it's spotless. The service cards show plain clean photos, and the before & after slider uses the before/after pairs (driveway, roof tiles, brick wall, deck, solar panels, pavers).
+The centrepiece is the hero: a real photo of a home with a big, filthy concrete driveway. As you scroll, a pressure-washer pass cleans it strip by strip, with a wet sheen, foam and flying droplets, until it's spotless. The service cards show plain clean photos, and the before & after slider uses the before/after pairs (driveway, roof tiles, brick wall, deck, solar panels, pavers).
 
 > **The photos are placeholders.** They're free stock photos (credits in [CREDITS.md](CREDITS.md)), and the "before" versions have dirt added digitally. Swap in real photos of your own jobs before launch. It's one command per surface, see [Add your own photos](#add-your-own-photos).
 

@@ -31,8 +31,8 @@
     <svg viewBox="0 0 48 48"><path d="M24 2.6c-3.9 5.1-15.6 17.5-15.6 27.9a15.6 15.6 0 0 0 31.2 0C39.6 20.1 27.9 7.7 24 2.6z" fill="#22D8C5"/><path d="M15.6 34.1a9 9 0 1 1 16.8 0" fill="none" stroke="#0A1626" stroke-width="3.4" stroke-linecap="round"/><path d="M24 31l4.6-5.3" fill="none" stroke="#0A1626" stroke-width="3.4" stroke-linecap="round"/><circle cx="24" cy="31" r="2.7" fill="#0A1626"/></svg>
     <b>freshstart</b>
   </div>
-  <h1 class="title" id="t"><span class="ln">A fresh start</span><br><span class="ln">for every surface.</span></h1>
-  <p class="sub">Driveways · Roofs · House washing · Decks · Solar <span>— Brisbane</span></p>
+  <h1 class="title" id="t"><span class="ln">Bringing driveways</span><br><span class="ln">back to life.</span></h1>
+  <p class="sub">Driveways · Paths · Patios · House washing <span>— Brisbane</span></p>
   <span class="tag"><i>●</i> Free quotes</span>
 </div>
 <script src="assets/js/surface-engine.js"></script>
@@ -46,7 +46,7 @@
   const P = 'assets/img/photos/';
   const [after, before] = await Promise.all([S.loadImage(P + 'hero-after-desktop.webp'), S.loadImage(P + 'hero-before-desktop.webp')]);
   const pair = eng.pair(after, before, [0, 0, 1, 1]);
-  const map = S.coverMap(1200, 630, pair.iw, pair.ih, 0.42, 1);
+  const map = S.coverMap(1200, 630, pair.iw, pair.ih, 0.5, 1);
   eng.draw(pair, 1200, 630, { map, H: null, sweep: [0, 1, 0, 1], rows: 6, prog: 3.45, margin: 0.04, time: 3, spray: 0.9, dry: 0.4, vig: 0.12 });
   document.body.dataset.ready = '1';
 })();

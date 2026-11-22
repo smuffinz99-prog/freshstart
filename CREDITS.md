@@ -8,7 +8,7 @@ The placeholder photos are from [Pexels](https://www.pexels.com/license/). The P
 
 | Used for | Photo | Photographer |
 | --- | --- | --- |
-| Hero (Australian weatherboard house, Unsplash licence) | [A small white house with a blue roof](https://unsplash.com/photos/KsOcybpXxdI) | Paddy Pohlod |
+| Hero (concrete driveway, Unsplash licence) | [Modern white house with large windows and a concrete driveway](https://unsplash.com/photos/W7XqqixNnII) | Salvo Media LLC |
 | About section (Hobart bungalow, Unsplash licence) | [A house with a white picket fence](https://unsplash.com/photos/QG_fW5GSEKs) | K8 |
 | Driveway card, Driveway slider tab | [White and brown wooden house](https://www.pexels.com/photo/3935333/) | Curtis Adams |
 | Roof card and tab | [Close-up of roof tiles](https://www.pexels.com/photo/27806149/) | Bunyamin Cicek |

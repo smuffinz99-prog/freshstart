@@ -39,11 +39,11 @@
     path: 'assets/img/photos/',
     sizes: [720, 1280], /* card + slider files: <name>-<before|after>-<size>.webp */
     hero: {
-      /* Australian weatherboard house (Unsplash, see CREDITS.md). The 'before' is the same photo with real grime
-         borrowed from the other before/after pairs. beforeRect = whole photo, so the roof, gates and driveway all clean. */
-      desktop: { after: 'hero-after-desktop.webp', before: 'hero-before-desktop.webp', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.42, 1] },
+      /* Modern rendered home with a big concrete driveway (Unsplash, see CREDITS.md). The 'before' is the same photo with
+         real driveway grime borrowed from the driveway card pair. Both crops leave out a builder's sign at the far left. */
+      desktop: { after: 'hero-after-desktop.webp', before: 'hero-before-desktop.webp', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
       mobile: { after: 'hero-after-mobile.webp', before: 'hero-before-mobile.webp', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
-      slab: null, /* no slab joints to follow on this driveway: strips sweep across the screen */
+      slab: null, /* strips sweep straight across the screen */
     },
   };
 
