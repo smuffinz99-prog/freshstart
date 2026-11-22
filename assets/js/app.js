@@ -11,10 +11,9 @@
        quoteTo. The very first request sends an activation email to that address: click the link
        in it once. FormSubmit then emails you a random string you can paste here instead of the
        address, so it isn't visible in the page (it also goes in the form's action in index.html). */
-    quoteTo: 'billyfrench024@gmail.com',
+    quoteTo: 'freshstartpressurewashing11@gmail.com',
     maxPhotos: 6,
     email: 'freshstartpressurewashing11@gmail.com',
-    phoneDisplay: '0491 570 156',
 
   };
   /* ===================================================================== */
@@ -30,8 +29,8 @@
     hero: {
       /* Straight-on concrete driveway in front of a garage door (Unsplash, see CREDITS.md). The 'before' is the same
          photo with real concrete grime, oil stains and wheel-path dirt added. */
-      desktop: { after: 'hero-after-desktop.webp?v=9', before: 'hero-before-desktop.webp?v=9', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
-      mobile: { after: 'hero-after-mobile.webp?v=9', before: 'hero-before-mobile.webp?v=9', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      desktop: { after: 'hero-after-desktop.webp?v=10', before: 'hero-before-desktop.webp?v=10', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      mobile: { after: 'hero-after-mobile.webp?v=10', before: 'hero-before-mobile.webp?v=10', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
       slab: null, /* strips sweep straight across the screen */
     },
   };
@@ -379,7 +378,7 @@
   }
 
   /* --------------------------------------------------------------- before / after slider */
-  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=9`;
+  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=10`;
   const photoSize = (cssW) => (cssW * Math.min(window.devicePixelRatio || 1, 2) <= 760 ? PHOTOS.sizes[0] : PHOTOS.sizes[1]);
 
   function initBA() {

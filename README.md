@@ -18,7 +18,7 @@ Because the preview is public before the real details are in, it has three previ
 
 1. **Hidden from Google.** `index.html` and `privacy.html` each have a `<meta name="robots" content="noindex">` line marked `PREVIEW ONLY`. Delete both lines when you go live on your own domain, or the site won't show up in search.
 2. **Reviews hidden.** The sample reviews section has a `hidden` attribute, and its two `Reviews` links are commented out. When you have real reviews, put them in, remove `hidden` and un-comment the links. Section numbers update by themselves.
-3. **Phone `0491 570 156`.** This is a number the ACMA reserves for fiction, so nobody real gets calls from the preview. Swap in yours (see below).
+3. **No phone number.** The site is email-only at the owner's request.
 
 ## What's in here
 
@@ -42,7 +42,7 @@ Because the preview is public before the real details are in, it has three previ
 
 Search the project for each of these and swap in the real details:
 
-- [ ] **Phone**: `0491 570 156` and `+61491570156` (`tel:` links, the structured data, and `CONFIG.phoneDisplay` in `app.js`)
+- [x] **Phone**: removed at the owner's request (22 Nov 2026). Contact is email only.
 - [ ] **Email**: `freshstartpressurewashing11@gmail.com` (also `CONFIG.email` in `app.js`)
 
 - [x] **Hero stats**: 500+ jobs, 100% satisfaction, 10+ years (confirmed true by the owner 22 Nov 2026). Update the numbers as they grow (index.html, search for hero__stats).
@@ -56,9 +56,9 @@ Search the project for each of these and swap in the real details:
 - [ ] **Quote form**: wired to FormSubmit, but click the activation email after the first request (see below).
 - [ ] **Analytics**: the GoatCounter snippet points at `smuffinz.goatcounter.com`. Keep it, swap it for your own, or delete it.
 
-### Quote form delivery (set up: emails billyfrench024@gmail.com)
+### Quote form delivery (set up: emails freshstartpressurewashing11@gmail.com)
 
-The form posts to [FormSubmit](https://formsubmit.co) (free, no account) and every request, with up to 6 customer photos attached, is emailed to `billyfrench024@gmail.com`. Photos are shrunk in the browser to about 150 KB each, so they always fit under FormSubmit's 10 MB limit.
+The form posts to [FormSubmit](https://formsubmit.co) (free, no account) and every request, with up to 6 customer photos attached, is emailed to `freshstartpressurewashing11@gmail.com`. Photos are shrunk in the browser to about 150 KB each, so they always fit under FormSubmit's 10 MB limit.
 
 1. **Activate it once.** The very first quote request sends an activation email to that inbox. Open it and click the confirm link. Until then, nothing is delivered.
 2. **Hide the address (optional, recommended).** After activating, FormSubmit emails a random string. Put it in place of the email address in the form's `action` in `index.html` (`https://formsubmit.co/<string>`) and in `CONFIG.quoteTo` in `app.js`, so spam bots can't read the address from the page.
