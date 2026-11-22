@@ -12,6 +12,9 @@
        in it once. FormSubmit then emails you a random string you can paste here instead of the
        address, so it isn't visible in the page (it also goes in the form's action in index.html). */
     quoteTo: 'freshstartpressurewashing11@gmail.com',
+    /* Preferred delivery: your own Gmail sends quotes to itself via a free Google Apps Script
+       (tools/quote-mailer.gs). Paste its Web app URL (ends in /exec) here. Empty = FormSubmit only. */
+    quoteScriptUrl: '',
     maxPhotos: 6,
     email: 'freshstartpressurewashing11@gmail.com',
 
@@ -29,8 +32,8 @@
     hero: {
       /* Straight-on concrete driveway in front of a garage door (Unsplash, see CREDITS.md). The 'before' is the same
          photo with real concrete grime, oil stains and wheel-path dirt added. */
-      desktop: { after: 'hero-after-desktop.webp?v=10', before: 'hero-before-desktop.webp?v=10', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
-      mobile: { after: 'hero-after-mobile.webp?v=10', before: 'hero-before-mobile.webp?v=10', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      desktop: { after: 'hero-after-desktop.webp?v=11', before: 'hero-before-desktop.webp?v=11', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      mobile: { after: 'hero-after-mobile.webp?v=11', before: 'hero-before-mobile.webp?v=11', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
       slab: null, /* strips sweep straight across the screen */
     },
   };
@@ -378,7 +381,7 @@
   }
 
   /* --------------------------------------------------------------- before / after slider */
-  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=10`;
+  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=11`;
   const photoSize = (cssW) => (cssW * Math.min(window.devicePixelRatio || 1, 2) <= 760 ? PHOTOS.sizes[0] : PHOTOS.sizes[1]);
 
   function initBA() {
@@ -587,7 +590,9 @@
     }
 
     form.addEventListener('input', (e) => { const f = e.target.closest('.field'); if (f) f.classList.remove('is-invalid'); });
-    form.addEventListener('submit', (e) => {
+    const toB64 = (file) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
+    const btnLabel = $('button[type="submit"] span', form), btnText = btnLabel.textContent;
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       err.hidden = true;
       if (F._honey.value) return; // bot
@@ -627,8 +632,28 @@
         return;
       }
       form.classList.add('is-sending');
-      $('button[type="submit"] span', form).textContent = files.length ? 'Sending your request and photos...' : 'Sending...';
-      HTMLFormElement.prototype.submit.call(form); // real multipart post to FormSubmit, which redirects back here
+      btnLabel.textContent = files.length ? 'Sending your request and photos...' : 'Sending...';
+
+      // 1st choice: the owner's own Gmail via the Apps Script mailer (tools/quote-mailer.gs)
+      if (CONFIG.quoteScriptUrl) {
+        try {
+          const payload = {
+            fields: { name: F.name.value.trim(), phone: F.phone.value.trim(), email: em, suburb: F.suburb.value.trim(), services: F.Services.value,
+              size: F.size.value.trim(), message: F.message.value.trim(), page: location.href },
+            photos: await Promise.all(files.map(async (f) => ({ name: f.name, type: f.type || 'image/jpeg', data: await toB64(f) }))),
+          };
+          // text/plain keeps it a "simple" request (no CORS preflight, which Apps Script can't answer)
+          const r = await fetch(CONFIG.quoteScriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+          let ok = r.ok;
+          try { const j = await r.json(); if (j && j.ok === false) ok = false; } catch (ex) {}
+          if (!ok) throw new Error('mailer failed');
+          $$('input[data-n]', form).forEach((c) => { c.name = c.dataset.n; });
+          form.classList.remove('is-sending'); btnLabel.textContent = btnText;
+          body.hidden = true; done.hidden = false; done.focus();
+          return;
+        } catch (ex) { /* fall through to FormSubmit so the request isn't lost */ }
+      }
+      HTMLFormElement.prototype.submit.call(form); // backup: real multipart post to FormSubmit, which redirects back here
     });
     // if someone comes back with the browser's back button, put the checkbox names back
     window.addEventListener('pageshow', () => { $$('input[data-n]', form).forEach((c) => { c.name = c.dataset.n; }); form.classList.remove('is-sending'); });
