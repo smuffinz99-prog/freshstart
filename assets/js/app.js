@@ -13,7 +13,7 @@
        Leave both empty and the form opens the visitor's email app instead. */
     web3formsKey: '',
     formEndpoint: '',
-    email: 'hello@freshstartpressurewashing.com.au',
+    email: 'freshstartpressurewashing11@gmail.com',
     phoneDisplay: '0491 570 156',
 
     /* Estimator (AUD, GST incl.). First size = the "from" price. */
@@ -819,6 +819,11 @@
   function initForm() {
     const form = $('#quote-form');
     if (!form) return;
+    // "Get a quote" buttons on service cards tick that service in the form
+    $$('[data-quote]').forEach((a) => a.addEventListener('click', () => {
+      const want = a.dataset.quote;
+      $$('input[name="services"]', form).forEach((c) => { if (c.value === want) c.checked = true; });
+    }));
     const body = $('.form__body', form), done = $('.form__done', form), err = $('.form__error', form);
     const F = form.elements;
     const mark = (name, bad) => { const f = F[name].closest('.field'); if (f) f.classList.toggle('is-invalid', bad); return bad; };
@@ -839,7 +844,7 @@
       const services = $$('input[name="services"]:checked', form).map((c) => c.value);
       const data = {
         name: F.name.value.trim(), phone: F.phone.value.trim(), email: em, suburb: F.suburb.value.trim(),
-        services: services.join(', '), message: F.message.value.trim(),
+        services: services.join(', '), size: F.size.value.trim(), message: F.message.value.trim(),
       };
       form.classList.add('is-sending');
       try {
@@ -854,7 +859,7 @@
           const r = await fetch(CONFIG.formEndpoint, { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
           if (!r.ok) throw new Error('send failed');
         } else {
-          const lines = [`Name: ${data.name}`, `Phone: ${data.phone}`, `Email: ${data.email || '-'}`, `Suburb: ${data.suburb}`, `Services: ${data.services || '-'}`, '', data.message];
+          const lines = [`Name: ${data.name}`, `Phone: ${data.phone}`, `Email: ${data.email || '-'}`, `Suburb: ${data.suburb}`, `Services: ${data.services || '-'}`, `Approx. size: ${data.size || '-'}`, '', data.message];
           window.location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent('Quote request: ' + data.suburb)}&body=${encodeURIComponent(lines.join('\n'))}`;
         }
         body.hidden = true;
