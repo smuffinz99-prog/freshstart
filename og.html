@@ -46,7 +46,7 @@
   const P = 'assets/img/photos/';
   const [after, before] = await Promise.all([S.loadImage(P + 'hero-after-desktop.webp'), S.loadImage(P + 'hero-before-desktop.webp')]);
   const pair = eng.pair(after, before, [0, 0, 1, 1]);
-  const map = S.coverMap(1200, 630, pair.iw, pair.ih, 0.5, 1);
+  const map = S.coverMap(1200, 630, pair.iw, pair.ih, 0.5, 0.35);
   eng.draw(pair, 1200, 630, { map, H: null, sweep: [0, 1, 0, 1], rows: 6, prog: 3.45, margin: 0.04, time: 3, spray: 0.9, dry: 0.4, vig: 0.12 });
   document.body.dataset.ready = '1';
 })();
