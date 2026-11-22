@@ -14,7 +14,7 @@
     quoteTo: 'freshstartpressurewashing11@gmail.com',
     /* Preferred delivery: your own Gmail sends quotes to itself via a free Google Apps Script
        (tools/quote-mailer.gs). Paste its Web app URL (ends in /exec) here. Empty = FormSubmit only. */
-    quoteScriptUrl: '',
+    quoteScriptUrl: 'https://script.google.com/macros/s/AKfycbzVFALCHE3cKmFq7zd06-XRh_k6cDMDSj0xMHvcqWXirynsgSfXw8RKIn_NUU3Ughl1kQ/exec',
     maxPhotos: 6,
     email: 'freshstartpressurewashing11@gmail.com',
 
@@ -32,8 +32,8 @@
     hero: {
       /* Straight-on concrete driveway in front of a garage door (Unsplash, see CREDITS.md). The 'before' is the same
          photo with real concrete grime, oil stains and wheel-path dirt added. */
-      desktop: { after: 'hero-after-desktop.webp?v=11', before: 'hero-before-desktop.webp?v=11', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
-      mobile: { after: 'hero-after-mobile.webp?v=11', before: 'hero-before-mobile.webp?v=11', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      desktop: { after: 'hero-after-desktop.webp?v=12', before: 'hero-before-desktop.webp?v=12', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      mobile: { after: 'hero-after-mobile.webp?v=12', before: 'hero-before-mobile.webp?v=12', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
       slab: null, /* strips sweep straight across the screen */
     },
   };
@@ -381,7 +381,7 @@
   }
 
   /* --------------------------------------------------------------- before / after slider */
-  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=11`;
+  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=12`;
   const photoSize = (cssW) => (cssW * Math.min(window.devicePixelRatio || 1, 2) <= 760 ? PHOTOS.sizes[0] : PHOTOS.sizes[1]);
 
   function initBA() {
