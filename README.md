@@ -44,7 +44,7 @@ Search the project for each of these and swap in the real details:
 
 - [ ] **Phone**: `0491 570 156` and `+61491570156` (`tel:` links, the structured data, and `CONFIG.phoneDisplay` in `app.js`)
 - [ ] **Email**: `freshstartpressurewashing11@gmail.com` (also `CONFIG.email` in `app.js`)
-- [ ] **About photo**: the About section uses a stock photo of a Hobart bungalow. Swap in a photo of you, your van or a real job (`index.html`, search for about__media).
+
 - [x] **Hero stats**: 500+ jobs, 100% satisfaction, 10+ years (confirmed true by the owner 22 Nov 2026). Update the numbers as they grow (index.html, search for hero__stats).
 - [ ] **ABN**: `ABN 00 000 000 000` in the footer
 - [ ] **City and suburbs**: the site says **Brisbane**. Change it in the hero eyebrow, `<title>`, meta description, structured data, the FAQ ("Brisbane's humidity") and the footer.
@@ -53,15 +53,18 @@ Search the project for each of these and swap in the real details:
 - [ ] **Search visibility**: delete the two `PREVIEW ONLY` noindex lines (see Live preview above).
 - [ ] **Insurance and guarantee**: the site says "fully insured" and promises free re-cleans within 7 days. Only keep those if they're true for you.
 - [ ] **Socials**: the Instagram, Facebook and TikTok links in the footer are `#`.
-- [ ] **Quote form**: see below. Without it the form falls back to opening the visitor's email app.
+- [ ] **Quote form**: wired to FormSubmit, but click the activation email after the first request (see below).
 - [ ] **Analytics**: the GoatCounter snippet points at `smuffinz.goatcounter.com`. Keep it, swap it for your own, or delete it.
 
-### Make the quote form send to you
+### Quote form delivery (set up: emails billyfrench024@gmail.com)
 
-1. Go to https://web3forms.com, enter the email address that should receive quotes, and copy the access key.
-2. Paste it into `CONFIG.web3formsKey` in `assets/js/app.js`.
+The form posts to [FormSubmit](https://formsubmit.co) (free, no account) and every request, with up to 6 customer photos attached, is emailed to `billyfrench024@gmail.com`. Photos are shrunk in the browser to about 150 KB each, so they always fit under FormSubmit's 10 MB limit.
 
-Formspree works too: put the form URL in `CONFIG.formEndpoint`.
+1. **Activate it once.** The very first quote request sends an activation email to that inbox. Open it and click the confirm link. Until then, nothing is delivered.
+2. **Hide the address (optional, recommended).** After activating, FormSubmit emails a random string. Put it in place of the email address in the form's `action` in `index.html` (`https://formsubmit.co/<string>`) and in `CONFIG.quoteTo` in `app.js`, so spam bots can't read the address from the page.
+3. To change who receives quotes, change the address in both of those places and activate again.
+
+After sending, customers land back on the site with a "Request sent" message.
 
 ### Add your own photos
 

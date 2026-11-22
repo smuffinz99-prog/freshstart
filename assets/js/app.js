@@ -7,12 +7,12 @@
 
   /* =============================== CONFIG =============================== */
   const CONFIG = {
-    /* Quote form delivery. Pick ONE:
-       - web3formsKey: free at https://web3forms.com (paste the access key)
-       - formEndpoint: e.g. a Formspree URL like https://formspree.io/f/xxxxxx
-       Leave both empty and the form opens the visitor's email app instead. */
-    web3formsKey: '',
-    formEndpoint: '',
+    /* Quote form delivery: FormSubmit (free, no account). Requests and photos are emailed to
+       quoteTo. The very first request sends an activation email to that address: click the link
+       in it once. FormSubmit then emails you a random string you can paste here instead of the
+       address, so it isn't visible in the page (it also goes in the form's action in index.html). */
+    quoteTo: 'billyfrench024@gmail.com',
+    maxPhotos: 6,
     email: 'freshstartpressurewashing11@gmail.com',
     phoneDisplay: '0491 570 156',
 
@@ -30,8 +30,8 @@
     hero: {
       /* Straight-on concrete driveway in front of a garage door (Unsplash, see CREDITS.md). The 'before' is the same
          photo with real concrete grime, oil stains and wheel-path dirt added. */
-      desktop: { after: 'hero-after-desktop.webp?v=8', before: 'hero-before-desktop.webp?v=8', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
-      mobile: { after: 'hero-after-mobile.webp?v=8', before: 'hero-before-mobile.webp?v=8', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      desktop: { after: 'hero-after-desktop.webp?v=9', before: 'hero-before-desktop.webp?v=9', size: [1920, 1080], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      mobile: { after: 'hero-after-mobile.webp?v=9', before: 'hero-before-mobile.webp?v=9', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
       slab: null, /* strips sweep straight across the screen */
     },
   };
@@ -379,7 +379,7 @@
   }
 
   /* --------------------------------------------------------------- before / after slider */
-  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=8`;
+  const photoUrl = (name, state, size) => `${PHOTOS.path}${name}-${state}-${size}.webp?v=9`;
   const photoSize = (cssW) => (cssW * Math.min(window.devicePixelRatio || 1, 2) <= 760 ? PHOTOS.sizes[0] : PHOTOS.sizes[1]);
 
   function initBA() {
@@ -509,6 +509,63 @@
   }
 
   /* --------------------------------------------------------------- quote form */
+  /* Shrink a photo to max 1600px JPEG so six of them fit comfortably under FormSubmit's 10MB limit. */
+  async function shrinkPhoto(file) {
+    const MAX = 1600;
+    let bmp;
+    try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+    catch (e) { bmp = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = URL.createObjectURL(file); }); }
+    const w0 = bmp.width, h0 = bmp.height, k = Math.min(1, MAX / Math.max(w0, h0));
+    const c = document.createElement('canvas'); c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise((res) => c.toBlob(res, 'image/jpeg', 0.82));
+    if (!blob) return file;
+    const name = (file.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg';
+    return new File([blob], name, { type: 'image/jpeg', lastModified: Date.now() });
+  }
+
+  function initPhotos(form) {
+    const box = $('[data-photos]', form);
+    if (!box) return { files: () => [] };
+    const input = $('#photo-input', box), grid = $('[data-photos-grid]', box), drop = $('[data-photos-drop]', box), status = $('[data-photos-status]', box);
+    const items = []; // { file, url, busy }
+    const say = (msg, warn) => { status.hidden = !msg; status.textContent = msg || ''; status.classList.toggle('is-warn', !!warn); };
+    const render = () => {
+      grid.innerHTML = '';
+      items.forEach((it, i) => {
+        const li = document.createElement('li'); if (it.busy) li.className = 'is-busy';
+        if (it.url) { const im = document.createElement('img'); im.src = it.url; im.alt = 'Photo ' + (i + 1); li.appendChild(im); }
+        const x = document.createElement('button'); x.type = 'button'; x.className = 'photos__remove'; x.setAttribute('aria-label', 'Remove photo ' + (i + 1)); x.textContent = '×';
+        x.addEventListener('click', () => { if (it.url) URL.revokeObjectURL(it.url); items.splice(i, 1); render(); });
+        li.appendChild(x); grid.appendChild(li);
+      });
+      const n = items.length;
+      if (!n) say('');
+      else say(n >= CONFIG.maxPhotos ? `${n} photos added. That's the maximum, nice work.` : `${n} photo${n > 1 ? 's' : ''} added. ${n < 3 ? 'A wide shot plus a close-up of the worst bit is perfect.' : 'Looking good.'}`);
+    };
+    async function add(list) {
+      const files = Array.from(list || []).filter((f) => /^image\//.test(f.type) || /\.(heic|heif|jpe?g|png|webp)$/i.test(f.name || ''));
+      if (!files.length) return;
+      const room = CONFIG.maxPhotos - items.length;
+      if (room <= 0) { say(`You can add up to ${CONFIG.maxPhotos} photos.`, true); return; }
+      const take = files.slice(0, room);
+      const slots = take.map(() => { const it = { file: null, url: '', busy: true }; items.push(it); return it; });
+      render();
+      await Promise.all(take.map(async (f, i) => {
+        const it = slots[i];
+        try { it.file = await shrinkPhoto(f); } catch (e) { it.file = f; }
+        try { it.url = URL.createObjectURL(it.file); } catch (e) {}
+        it.busy = false; render();
+      }));
+      if (files.length > room) say(`Added ${room}. You can add up to ${CONFIG.maxPhotos} photos.`, true);
+    }
+    input.addEventListener('change', () => { add(input.files); input.value = ''; });
+    ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('is-over'); }));
+    ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('is-over'); }));
+    drop.addEventListener('drop', (e) => add(e.dataTransfer && e.dataTransfer.files));
+    return { files: () => items.filter((it) => it.file && !it.busy).map((it) => it.file), busy: () => items.some((it) => it.busy) };
+  }
+
   function initForm() {
     const form = $('#quote-form');
     if (!form) return;
@@ -519,13 +576,22 @@
     }));
     const body = $('.form__body', form), done = $('.form__done', form), err = $('.form__error', form);
     const F = form.elements;
+    const photos = initPhotos(form);
     const mark = (name, bad) => { const f = F[name].closest('.field'); if (f) f.classList.toggle('is-invalid', bad); return bad; };
 
+    // back from FormSubmit after a successful send
+    const qs = new URLSearchParams(location.search);
+    if (qs.has('sent')) {
+      body.hidden = true; done.hidden = false;
+      history.replaceState(null, '', location.pathname + '#quote');
+      setTimeout(() => { const q = $('#quote'); if (q) q.scrollIntoView({ block: 'start' }); done.focus({ preventScroll: true }); }, 350);
+    }
+
     form.addEventListener('input', (e) => { const f = e.target.closest('.field'); if (f) f.classList.remove('is-invalid'); });
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
       err.hidden = true;
-      if (F.company.value) return; // honeypot
+      if (F._honey.value) return; // bot
       const bad = [];
       if (mark('name', !F.name.value.trim())) bad.push(F.name);
       if (mark('phone', F.phone.value.replace(/\D/g, '').length < 8)) bad.push(F.phone);
@@ -533,38 +599,40 @@
       if (mark('email', !!em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))) bad.push(F.email);
       if (mark('suburb', !F.suburb.value.trim())) bad.push(F.suburb);
       if (bad.length) { err.textContent = 'Please check the highlighted fields.'; err.hidden = false; bad[0].focus(); return; }
+      if (photos.busy && photos.busy()) { err.textContent = 'Hang on a sec, your photos are still getting ready.'; err.hidden = false; return; }
 
       const services = $$('input[name="services"]:checked', form).map((c) => c.value);
-      const data = {
-        name: F.name.value.trim(), phone: F.phone.value.trim(), email: em, suburb: F.suburb.value.trim(),
-        services: services.join(', '), size: F.size.value.trim(), message: F.message.value.trim(),
-      };
-      form.classList.add('is-sending');
-      try {
-        if (CONFIG.web3formsKey) {
-          const r = await fetch('https://api.web3forms.com/submit', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            body: JSON.stringify({ access_key: CONFIG.web3formsKey, subject: `New quote request: ${data.name} (${data.suburb})`, from_name: 'FreshStart website', ...data }),
-          });
-          const j = await r.json();
-          if (!j.success) throw new Error(j.message || 'send failed');
-        } else if (CONFIG.formEndpoint) {
-          const r = await fetch(CONFIG.formEndpoint, { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-          if (!r.ok) throw new Error('send failed');
-        } else {
-          const lines = [`Name: ${data.name}`, `Phone: ${data.phone}`, `Email: ${data.email || '-'}`, `Suburb: ${data.suburb}`, `Services: ${data.services || '-'}`, `Approx. size: ${data.size || '-'}`, '', data.message];
-          window.location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent('Quote request: ' + data.suburb)}&body=${encodeURIComponent(lines.join('\n'))}`;
-        }
-        body.hidden = true;
-        done.hidden = false;
-        done.focus();
-      } catch (ex) {
-        err.textContent = `Sorry, that didn't go through. Please call or text ${CONFIG.phoneDisplay}.`;
-        err.hidden = false;
-      } finally {
-        form.classList.remove('is-sending');
+      F.Services.value = services.join(', ') || 'Not specified';
+      F._subject.value = `New quote request: ${F.name.value.trim()} (${F.suburb.value.trim()})`;
+      F._next.value = location.origin + location.pathname + '?sent=1#quote';
+      $$('input[name="services"]', form).forEach((c) => { c.dataset.n = c.name; c.removeAttribute('name'); }); // sent as one "Services" line
+
+      // attach the shrunk photos as separate file fields
+      $$('input[data-photo-field]', form).forEach((x) => x.remove());
+      const files = photos.files();
+      let attached = 0;
+      if (files.length && typeof DataTransfer !== 'undefined') {
+        files.forEach((f, i) => {
+          try {
+            const dt = new DataTransfer(); dt.items.add(f);
+            const fi = document.createElement('input'); fi.type = 'file'; fi.name = 'Photo ' + (i + 1); fi.hidden = true; fi.setAttribute('data-photo-field', '');
+            fi.files = dt.files; form.appendChild(fi); attached++;
+          } catch (ex) {}
+        });
       }
+      F.message.value = F.message.value.trim() + (files.length && !attached ? '\n\n(Photos could not be attached from this browser. Please reply to ask for them.)' : '');
+
+      if (!CONFIG.quoteTo) { // no delivery set up: fall back to the visitor's email app
+        const lines = [`Name: ${F.name.value}`, `Phone: ${F.phone.value}`, `Email: ${em || '-'}`, `Suburb: ${F.suburb.value}`, `Services: ${F.Services.value}`, `Approx. size: ${F.size.value || '-'}`, '', F.message.value];
+        window.location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent('Quote request: ' + F.suburb.value)}&body=${encodeURIComponent(lines.join('\n'))}`;
+        return;
+      }
+      form.classList.add('is-sending');
+      $('button[type="submit"] span', form).textContent = files.length ? 'Sending your request and photos...' : 'Sending...';
+      HTMLFormElement.prototype.submit.call(form); // real multipart post to FormSubmit, which redirects back here
     });
+    // if someone comes back with the browser's back button, put the checkbox names back
+    window.addEventListener('pageshow', () => { $$('input[data-n]', form).forEach((c) => { c.name = c.dataset.n; }); form.classList.remove('is-sending'); });
   }
 
   /* --------------------------------------------------------------- footer wordmark */
