@@ -2,7 +2,7 @@
 
 A one-page static site for **FreshStart Pressure Washing**, a pressure washing and soft washing business ("A fresh start for every surface.").
 
-The centrepiece is the hero: a real photo of a filthy concrete driveway in front of a garage. As you scroll, a pressure-washer pass cleans it strip by strip, with a wet sheen, foam and flying droplets, until it's spotless. The service cards show plain clean photos, and the before & after slider uses the before/after pairs (driveway, roof tiles, brick wall, deck, solar panels, pavers).
+The centrepiece is the hero: a real photo of a filthy concrete driveway in front of a garage. As you scroll, a pressure-washer pass cleans it strip by strip, with a wet sheen, foam and flying droplets, until it's spotless. The service cards show plain clean photos, and the before & after slider uses the before/after pairs (driveway, brick wall, deck, pavers).
 
 > **The photos are placeholders.** They're free stock photos (credits in [CREDITS.md](CREDITS.md)), and the "before" versions have dirt added digitally. Swap in real photos of your own jobs before launch. It's one command per surface, see [Add your own photos](#add-your-own-photos).
 
@@ -24,7 +24,7 @@ Because the preview is public before the real details are in, it has three previ
 
 | File | What it is |
 | --- | --- |
-| `index.html` | The whole site: hero, about, services, why choose us, before & after, reviews (hidden), FAQ, quote form, footer |
+| `index.html` | The whole site: hero, about, quote form, services, before & after, reviews (hidden), FAQ, footer |
 | `assets/css/styles.css` | All styles. Brand colours are the variables at the top (`--ink`, `--aqua` ...) |
 | `assets/js/surface-engine.js` | WebGL engine for the hero: reveals the clean photo over the dirty one with the pressure-washer pass |
 | `assets/js/app.js` | Page behaviour. **`CONFIG` at the top holds the form delivery setting; `PHOTOS` holds the photo setup** |
@@ -72,7 +72,7 @@ Real before/after photos of your own work are the most persuasive thing on this 
    ```
    node tools/photos.js driveway before.jpg after.jpg
    ```
-   Slots: `driveway`, `roof`, `brick`, `deck`, `pavers`, `solar` (the service cards and slider tabs) and `hero`. Each run writes the WebP files into `assets/img/photos/` under the names the site already uses. Nothing else to change.
+   Slots: `driveway`, `brick`, `deck`, `pavers` (the service cards and slider tabs) and `hero`. Each run writes the WebP files into `assets/img/photos/` under the names the site already uses. Nothing else to change.
 3. **Hero only:** the tool prints a small change to make in `PHOTOS.hero` in `app.js`: switch the strips from "follow the driveway joints" to "run straight across".
 
 If you want the slider to show a different photo pair to its card, put the files anywhere and add `data-before="..." data-after="..."` to that tab button in `index.html`.

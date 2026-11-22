@@ -337,6 +337,13 @@ main { counter-reset: sec; }
 /* ---------------------------------------------------------------- services */
 /* ---------------------------------------------------------------- about */
 .about { background: var(--white); }
+.about--compact { padding-block: clamp(56px, 7vw, 96px); }
+.about__box { display: grid; grid-template-columns: 1fr 1.25fr; gap: clamp(24px, 5vw, 72px); align-items: center; }
+.about--compact h2 { font-size: clamp(32px, 3.8vw, 54px); }
+.about--compact .about__p { margin-top: 0; }
+.about--compact .about__badges { margin: 22px 0 0; }
+@media (max-width: 900px) { .about__box { grid-template-columns: 1fr; gap: 18px; } }
+@media (max-width: 560px) { .about--compact .about__badges { gap: 8px; } .about--compact .about__badges li { height: 38px; padding: 0 12px 0 10px; font-size: 13.5px; gap: 7px; } .about--compact .about__badges svg { width: 18px; height: 18px; } }
 .about__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 6vw, 96px); align-items: center; }
 .about h2 { font-size: clamp(38px, 4.9vw, 72px); }
 .about__p { margin-top: 18px; max-width: 37rem; font-size: 17px; color: var(--text-2); }
@@ -383,6 +390,8 @@ main { counter-reset: sec; }
 .svc:hover { box-shadow: var(--shadow-2); }
 .svc--wide { grid-column: span 7; }
 .svc--mid { grid-column: span 5; }
+.svc--half { grid-column: span 6; }
+.svc--full { grid-column: 1 / -1; }
 .svc__media { position: relative; height: clamp(230px, 23vw, 310px); background: #3b3a34; overflow: hidden; }
 .svc__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-out); }
 .svc:hover .svc__media img { transform: scale(1.04); }
@@ -423,8 +432,8 @@ main { counter-reset: sec; }
 .svc__media.is-static canvas, .svc__media.is-static .svc__meter, .svc.is-clean .svc__meter { opacity: 0; }
 .svc__meter { transition: opacity .6s var(--ease); }
 
-@media (max-width: 1023px) { .svc, .svc--wide, .svc--mid { grid-column: span 6; } .svc--dark { grid-column: 1 / -1; } }
-@media (max-width: 640px) { .bento { grid-template-columns: 1fr; } .svc, .svc--wide, .svc--mid { grid-column: 1 / -1; } .svc__media { height: 230px; } }
+@media (max-width: 1023px) { .svc, .svc--wide, .svc--mid, .svc--half { grid-column: span 6; } .svc--dark, .svc--full { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .bento { grid-template-columns: 1fr; } .svc, .svc--wide, .svc--mid, .svc--half { grid-column: 1 / -1; } .svc__media { height: 230px; } }
 
 /* ---------------------------------------------------------------- method / gauge */
 .method { background: var(--ink); color: #fff; overflow: hidden; }

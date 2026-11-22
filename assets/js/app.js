@@ -1,6 +1,6 @@
 /* ==========================================================================
    FreshStart Pressure Washing — page behaviour
-   Edit CONFIG below for form delivery and estimator prices.
+   Edit CONFIG below for form delivery and contact details.
    ========================================================================== */
 (function () {
   'use strict';
@@ -16,17 +16,6 @@
     email: 'freshstartpressurewashing11@gmail.com',
     phoneDisplay: '0491 570 156',
 
-    /* Estimator (AUD, GST incl.). First size = the "from" price. */
-    bundleDiscount: 0.10,          // 2+ services
-    estimateSpread: [0.92, 1.15],  // shown as a typical range around the estimate
-    services: [
-      { id: 'driveway', name: 'Driveway', form: 'Driveway', icon: 'driveway', sizes: [['Single', 179], ['Double', 259], ['Large / long', 349]] },
-      { id: 'paths', name: 'Paths & patio', form: 'Paths & patio', icon: 'paths', sizes: [['Small', 99], ['Medium', 169], ['Large', 249]] },
-      { id: 'house', name: 'House wash', form: 'House wash', icon: 'house', sizes: [['Single storey', 449], ['Double storey', 649], ['Large / split level', 849]] },
-      { id: 'roof', name: 'Roof clean', form: 'Roof', icon: 'roof', sizes: [['Small', 549], ['Medium', 749], ['Large', 949]] },
-      { id: 'deck', name: 'Deck', form: 'Deck', icon: 'deck', sizes: [['Up to 20 m²', 179], ['20 to 40 m²', 279], ['40 m²+', 379]] },
-      { id: 'solar', name: 'Solar panels', form: 'Solar panels', icon: 'solar', count: { min: 8, max: 40, step: 1, start: 12, base: 81, per: 6, unit: 'panels' } },
-    ],
   };
   /* ===================================================================== */
 
