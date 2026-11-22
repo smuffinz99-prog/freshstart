@@ -30,8 +30,8 @@
     hero: {
       /* Straight-on concrete driveway in front of a garage door (Unsplash, see CREDITS.md). The 'before' is the same
          photo with real concrete grime, oil stains and wheel-path dirt added. */
-      desktop: { after: 'hero-after-desktop.webp?v=4', before: 'hero-before-desktop.webp?v=4', size: [1920, 1200], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
-      mobile: { after: 'hero-after-mobile.webp?v=4', before: 'hero-before-mobile.webp?v=4', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      desktop: { after: 'hero-after-desktop.webp?v=6', before: 'hero-before-desktop.webp?v=6', size: [1920, 1200], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
+      mobile: { after: 'hero-after-mobile.webp?v=6', before: 'hero-before-mobile.webp?v=6', size: [750, 1538], beforeRect: [0, 0, 1, 1], focus: [0.5, 1] },
       slab: null, /* strips sweep straight across the screen */
     },
   };
@@ -183,8 +183,17 @@
         st.sweep = [a0, a1, Y(c0), Y(c1)];
         st.rows = 5;
       } else {
-        st.sweep = [0, 1, 0, 1];
-        st.rows = clamp(Math.round(st.h / (st.w < 700 ? 130 : 150)), 4, 8);
+        /* strips only cover the rows of the screen that actually have dirt on them */
+        let y0 = 1, y1 = 0;
+        for (let gy = 0; gy <= 64; gy++) for (let gx = 0; gx <= 32; gx++) {
+          const ix = (gx / 32) * st.map[0] + st.map[2], iy = (gy / 64) * st.map[1] + st.map[3];
+          if (eng.maskAt(p, ix, iy) < 0.3) continue;
+          y0 = Math.min(y0, gy / 64); y1 = Math.max(y1, gy / 64);
+        }
+        if (!(y1 > y0)) { y0 = 0; y1 = 1; }
+        y0 = Math.max(0, y0 - 0.015); y1 = Math.min(1, y1 + 0.015);
+        st.sweep = [0, 1, y0, y1];
+        st.rows = clamp(Math.round(st.h * (y1 - y0) / (st.w < 700 ? 120 : 140)), 3, 8);
       }
       st.needs = true;
     }

@@ -27,11 +27,11 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/styles.css?v=4">
-<link rel="preload" as="image" href="assets/img/photos/hero-before-mobile.webp?v=4" media="(max-aspect-ratio: 4/5)" fetchpriority="high">
-<link rel="preload" as="image" href="assets/img/photos/hero-after-mobile.webp?v=4" media="(max-aspect-ratio: 4/5)">
-<link rel="preload" as="image" href="assets/img/photos/hero-before-desktop.webp?v=4" media="(min-aspect-ratio: 4/5)" fetchpriority="high">
-<link rel="preload" as="image" href="assets/img/photos/hero-after-desktop.webp?v=4" media="(min-aspect-ratio: 4/5)">
+<link rel="stylesheet" href="assets/css/styles.css?v=6">
+<link rel="preload" as="image" href="assets/img/photos/hero-before-mobile.webp?v=6" media="(max-aspect-ratio: 4/5)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/img/photos/hero-after-mobile.webp?v=6" media="(max-aspect-ratio: 4/5)">
+<link rel="preload" as="image" href="assets/img/photos/hero-before-desktop.webp?v=6" media="(min-aspect-ratio: 4/5)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/img/photos/hero-after-desktop.webp?v=6" media="(min-aspect-ratio: 4/5)">
 
 <script>
   /* Decide the hero mode before first paint so the page height never jumps. */
@@ -125,7 +125,6 @@
       <span class="brand__word">freshstart</span>
     </a>
     <nav class="nav__links" aria-label="Main">
-      <a href="#about">About</a>
       <a href="#services">Services</a>
       <a href="#results">Results</a>
       <a href="#quote">Contact</a>
@@ -140,7 +139,6 @@
 
 <div class="menu" id="menu" aria-hidden="true">
   <nav class="menu__links" aria-label="Mobile">
-    <a href="#about">About</a>
     <a href="#services">Services</a>
     <a href="#results">Results</a>
     <!-- <a href="#reviews">Reviews</a> (un-comment with the reviews section) -->
@@ -212,22 +210,60 @@
   </div>
 </section>
 
-<!-- ===================================================== ABOUT -->
-<section class="section about about--compact" id="about">
+<!-- ===================================================== SERVICES -->
+<section class="section services" id="services">
   <div class="wrap">
-    <div class="about__box rv">
-      <div class="about__head">
-        <p class="eyebrow"><span></span>About us</p>
-        <h2>Your trusted driveway experts.</h2>
-      </div>
-      <div class="about__body">
-        <p class="about__p">At FreshStart Pressure Washing, we believe every surface deserves to look its best. From grimy driveways to mossy paths and patios, we use professional-grade equipment to bring concrete back to how it looked on day one. Reliable, affordable, and no job too big or too small.</p>
-        <ul class="about__badges">
-          <li><svg aria-hidden="true"><use href="#i-shield"/></svg>Fully insured</li>
-          <li><svg aria-hidden="true"><use href="#i-star"/></svg>10+ years experience</li>
-          <li><svg aria-hidden="true"><use href="#i-smile"/></svg>100% satisfaction guarantee</li>
-        </ul>
-      </div>
+    <header class="sec-head rv">
+      <p class="eyebrow"><span></span>What we clean</p>
+      <h2>Every surface, back to its best.</h2>
+      <p class="sec-head__lede">Driveways first, plus everything at ground level around them. We match the method to the surface, so it comes up clean without getting damaged.</p>
+    </header>
+
+    <div class="bento">
+      <article class="svc svc--wide rv" data-photo="driveway">
+        <div class="svc__media"><img src="assets/img/photos/driveway-after-720.webp" srcset="assets/img/photos/driveway-after-720.webp 720w, assets/img/photos/driveway-after-1280.webp 1280w" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 40vw" alt="" loading="lazy" decoding="async"><span class="svc__chip">Pressure clean</span></div>
+        <div class="svc__body">
+          <h3>Driveways &amp; concrete</h3>
+          <p>Plain, coloured or exposed aggregate. We lift oil, tyre marks, mould and years of built-up grime, then leave it stripe-free.</p>
+          <div class="svc__foot"><a class="svc__quote" href="#quote" data-quote="Driveway">Get a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        </div>
+      </article>
+
+      <article class="svc svc--mid rv" style="--d:1" data-photo="pavers">
+        <div class="svc__media"><img src="assets/img/photos/pavers-after-720.webp" srcset="assets/img/photos/pavers-after-720.webp 720w, assets/img/photos/pavers-after-1280.webp 1280w" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 40vw" alt="" loading="lazy" decoding="async"><span class="svc__chip">Pressure clean</span></div>
+        <div class="svc__body">
+          <h3>Pavers &amp; patios</h3>
+          <p>Weeds, moss and black spots blasted out of the joints. Re-sanding and sealing available.</p>
+          <div class="svc__foot"><a class="svc__quote" href="#quote" data-quote="Paths &amp; patio">Get a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        </div>
+      </article>
+
+      <article class="svc svc--half rv" data-photo="brick">
+        <div class="svc__media"><img src="assets/img/photos/brick-after-720.webp" srcset="assets/img/photos/brick-after-720.webp 720w, assets/img/photos/brick-after-1280.webp 1280w" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 40vw" alt="" loading="lazy" decoding="async"><span class="svc__chip">Soft wash</span></div>
+        <div class="svc__body">
+          <h3>House washing</h3>
+          <p>Brick, render, cladding and weatherboard. Cobwebs, dust and mould gone, paint and mortar left intact.</p>
+          <div class="svc__foot"><a class="svc__quote" href="#quote" data-quote="House wash">Get a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        </div>
+      </article>
+
+      <article class="svc svc--half rv" style="--d:1" data-photo="deck">
+        <div class="svc__media"><img src="assets/img/photos/deck-after-720.webp" srcset="assets/img/photos/deck-after-720.webp 720w, assets/img/photos/deck-after-1280.webp 1280w" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 40vw" alt="" loading="lazy" decoding="async"><span class="svc__chip">Low pressure</span></div>
+        <div class="svc__body">
+          <h3>Decks &amp; timber</h3>
+          <p>Weathered grey boards brought back to warm, rich colour, cleaned with the grain and ready for oil.</p>
+          <div class="svc__foot"><a class="svc__quote" href="#quote" data-quote="Deck">Get a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        </div>
+      </article>
+
+      <article class="svc svc--full svc--dark rv">
+        <div class="svc__dark">
+          <span class="svc__icon" aria-hidden="true"><svg><use href="#i-building"/></svg></span>
+          <h3>Commercial &amp; strata</h3>
+          <p>Shopfronts, car parks, body corporate common areas, bin bays and graffiti removal. Out-of-hours work and recurring maintenance plans available.</p>
+          <a class="btn btn--primary" href="#quote" data-quote="Commercial">Get a commercial quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
+      </article>
     </div>
   </div>
 </section>
@@ -287,64 +323,6 @@
         <p>We'll be in touch within one business day with your free quote. Got photos? Email them to <a href="mailto:freshstartpressurewashing11@gmail.com?subject=Photos%20for%20my%20quote">freshstartpressurewashing11@<wbr>gmail.com</a> and we'll quote even faster.</p>
       </div>
     </form>
-  </div>
-</section>
-
-<!-- ===================================================== SERVICES -->
-<section class="section services" id="services">
-  <div class="wrap">
-    <header class="sec-head rv">
-      <p class="eyebrow"><span></span>What we clean</p>
-      <h2>Every surface, back to its best.</h2>
-      <p class="sec-head__lede">Driveways first, plus everything at ground level around them. We match the method to the surface, so it comes up clean without getting damaged.</p>
-    </header>
-
-    <div class="bento">
-      <article class="svc svc--wide rv" data-photo="driveway">
-        <div class="svc__media"><img src="assets/img/photos/driveway-after-720.webp" srcset="assets/img/photos/driveway-after-720.webp 720w, assets/img/photos/driveway-after-1280.webp 1280w" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 40vw" alt="" loading="lazy" decoding="async"><span class="svc__chip">Pressure clean</span></div>
-        <div class="svc__body">
-          <h3>Driveways &amp; concrete</h3>
-          <p>Plain, coloured or exposed aggregate. We lift oil, tyre marks, mould and years of built-up grime, then leave it stripe-free.</p>
-          <div class="svc__foot"><a class="svc__quote" href="#quote" data-quote="Driveway">Get a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
-        </div>
-      </article>
-
-      <article class="svc svc--mid rv" style="--d:1" data-photo="pavers">
-        <div class="svc__media"><img src="assets/img/photos/pavers-after-720.webp" srcset="assets/img/photos/pavers-after-720.webp 720w, assets/img/photos/pavers-after-1280.webp 1280w" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 40vw" alt="" loading="lazy" decoding="async"><span class="svc__chip">Pressure clean</span></div>
-        <div class="svc__body">
-          <h3>Pavers &amp; patios</h3>
-          <p>Weeds, moss and black spots blasted out of the joints. Re-sanding and sealing available.</p>
-          <div class="svc__foot"><a class="svc__quote" href="#quote" data-quote="Paths &amp; patio">Get a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
-        </div>
-      </article>
-
-      <article class="svc svc--half rv" data-photo="brick">
-        <div class="svc__media"><img src="assets/img/photos/brick-after-720.webp" srcset="assets/img/photos/brick-after-720.webp 720w, assets/img/photos/brick-after-1280.webp 1280w" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 40vw" alt="" loading="lazy" decoding="async"><span class="svc__chip">Soft wash</span></div>
-        <div class="svc__body">
-          <h3>House washing</h3>
-          <p>Brick, render, cladding and weatherboard. Cobwebs, dust and mould gone, paint and mortar left intact.</p>
-          <div class="svc__foot"><a class="svc__quote" href="#quote" data-quote="House wash">Get a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
-        </div>
-      </article>
-
-      <article class="svc svc--half rv" style="--d:1" data-photo="deck">
-        <div class="svc__media"><img src="assets/img/photos/deck-after-720.webp" srcset="assets/img/photos/deck-after-720.webp 720w, assets/img/photos/deck-after-1280.webp 1280w" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 40vw" alt="" loading="lazy" decoding="async"><span class="svc__chip">Low pressure</span></div>
-        <div class="svc__body">
-          <h3>Decks &amp; timber</h3>
-          <p>Weathered grey boards brought back to warm, rich colour, cleaned with the grain and ready for oil.</p>
-          <div class="svc__foot"><a class="svc__quote" href="#quote" data-quote="Deck">Get a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
-        </div>
-      </article>
-
-      <article class="svc svc--full svc--dark rv">
-        <div class="svc__dark">
-          <span class="svc__icon" aria-hidden="true"><svg><use href="#i-building"/></svg></span>
-          <h3>Commercial &amp; strata</h3>
-          <p>Shopfronts, car parks, body corporate common areas, bin bays and graffiti removal. Out-of-hours work and recurring maintenance plans available.</p>
-          <a class="btn btn--primary" href="#quote" data-quote="Commercial">Get a commercial quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </div>
-      </article>
-    </div>
   </div>
 </section>
 
@@ -501,7 +479,6 @@
     <nav aria-label="Company">
       <h4>Company</h4>
       <ul>
-        <li><a href="#about">About us</a></li>
         <li><a href="#results">Before &amp; after</a></li>
         <!-- <li><a href="#reviews">Reviews</a></li> (un-comment with the reviews section) -->
         <li><a href="#faq">FAQ</a></li>
@@ -536,8 +513,8 @@
   <a class="btn btn--primary" href="#quote">Get a free quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
 </div>
 
-<script src="assets/js/surface-engine.js?v=4" defer></script>
-<script src="assets/js/app.js?v=4" defer></script>
+<script src="assets/js/surface-engine.js?v=6" defer></script>
+<script src="assets/js/app.js?v=6" defer></script>
 <script data-goatcounter="https://smuffinz.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
