@@ -60,13 +60,13 @@ Search the project for each of these and swap in the real details:
 
 FormSubmit (the backup below) reported quotes as sent but they never reached the inbox in testing, so the
 reliable route is a tiny free Google script that makes **your own Gmail send each quote to itself**, photos attached.
-The code is in .
+The code is in `tools/quote-mailer.gs`.
 
 1. Signed in as **freshstartpressurewashing11@gmail.com**, open https://script.google.com and click **New project**.
-2. Delete the sample code, paste the whole of , and click **Save** (name it "FreshStart quotes").
+2. Delete the sample code, paste the whole of `tools/quote-mailer.gs`, and click **Save** (name it "FreshStart quotes").
 3. Click **Deploy > New deployment**, pick **Web app** (gear icon), set **Execute as: Me** and **Who has access: Anyone**, click **Deploy**.
 4. Click **Authorize access**, choose the account, then **Advanced > Go to FreshStart quotes (unsafe)** and **Allow**. ("Unsafe" only means Google hasn't reviewed your own private script.)
-5. Copy the **Web app URL** (ends in ) into  in .
+5. Copy the **Web app URL** (ends in `/exec`) into `CONFIG.quoteScriptUrl` in `assets/js/app.js`.
 
 If the script ever fails, the form automatically falls back to FormSubmit so the request isn't lost.
 
