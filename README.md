@@ -45,7 +45,7 @@ Search the project for each of these and swap in the real details:
 - [ ] **Phone**: `0491 570 156` and `+61491570156` (`tel:` links, the structured data, and `CONFIG.phoneDisplay` in `app.js`)
 - [ ] **Email**: `freshstartpressurewashing11@gmail.com` (also `CONFIG.email` in `app.js`)
 - [ ] **About photo**: the About section reuses the stock house photo. Swap in a photo of you, your van or a real job (`index.html`, search for about__media).
-- [ ] **Hero stats**: Free / 100% / 7-day are promises, not track record. Only add numbers like "500+ jobs" or "10+ years" once they are true (Australian Consumer Law).
+- [x] **Hero stats**: 500+ jobs, 100% satisfaction, 10+ years (confirmed true by the owner 22 Nov 2026). Update the numbers as they grow (index.html, search for hero__stats).
 - [ ] **ABN**: `ABN 00 000 000 000` in the footer
 - [ ] **City and suburbs**: the site says **Brisbane**. Change it in the hero eyebrow, `<title>`, meta description, structured data, the service-area section, the FAQ ("Brisbane's humidity") and the footer. Swap in your real suburb list.
 - [ ] **Prices**: card "From $..." prices in `index.html` and the estimator prices in `CONFIG.services` (`app.js`). These are realistic starting points for AU, not quotes.
