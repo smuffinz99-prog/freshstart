@@ -1,0 +1,29 @@
+{
+  "hosting": {
+    "site": "freshstart-washing",
+    "public": ".",
+    "cleanUrls": false,
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "**/.*",
+      "**/node_modules/**",
+      "tools/**",
+      "serve.js",
+      "*.log",
+      "README.md",
+      "brand.html",
+      "og.html"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css|webp|jpg|png|woff2|svg)",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      }
+    ]
+  }
+}

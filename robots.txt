@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://smuffinz99-prog.github.io/freshstart/sitemap.xml
+Sitemap: https://freshstart-washing.web.app/sitemap.xml
