@@ -804,3 +804,55 @@ fieldset.field legend { padding: 0; margin-bottom: 8px; }
   .js .rv { opacity: 1; transform: none; }
   .ticker__track { animation: none; }
 }
+
+/* ==========================================================================
+   DARK THEME (2026-11-24, at the owner's request). The light-theme rules above
+   are re-pointed here: tokens first, then the few spots that hard-code
+   ink-on-white. Delete this block to go back to the light site.
+   ========================================================================== */
+:root {
+  color-scheme: dark;
+  --paper: #07111D;      /* page + alternating section background */
+  --paper-2: #1A3050;    /* tracks, placeholders */
+  --white: #0D1B2D;      /* cards and the lighter section background */
+  --text: #EEF2F6;
+  --text-2: #A9B4C2;
+  --text-3: #8592A3;
+  --line: rgba(255, 255, 255, .09);
+  --line-2: rgba(255, 255, 255, .18);
+  --aqua-deep: #3FE3D1;  /* links: the deep teal is too dark on navy */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, .3), 0 24px 60px -12px rgba(0, 0, 0, .6);
+}
+/* Sections that used plain white now sit one shade lighter than the page. */
+.results, .faq { background: var(--white); }
+.services { background: var(--paper); }
+.quote { background: radial-gradient(90% 60% at 100% 0%, rgba(34, 216, 197, .10), transparent 60%), var(--ink); }
+
+/* Cards: give them an edge so they don't melt into the background. */
+.svc, .review { box-shadow: inset 0 0 0 1px var(--line), var(--shadow-1); }
+.svc--dark { background: var(--ink-2); }
+
+/* Text that was ink-on-white */
+.btn--line { background: rgba(255, 255, 255, .06); color: var(--text); }
+.btn--line:hover { box-shadow: inset 0 0 0 1.5px var(--aqua); }
+.svc__price b, .svc__link b, .form__tip b { color: var(--text); }
+.svc__link svg, .qa__icon { background: var(--ink-3); color: var(--aqua); }
+.faq__head a { color: var(--aqua); }
+.ba__tabs button:hover, .size:hover { color: var(--text); }
+
+/* Dark pills that were dark-on-light */
+.eyebrow span { background: var(--ink-3); }
+.btn--ink, .svc__quote { background: var(--ink-3); }
+.ba__tabs button[aria-selected="true"], .chip input:checked + span, .size[aria-pressed="true"] { background: var(--aqua); color: var(--ink); }
+
+/* Quote form */
+.form { background: var(--white); color: var(--text); box-shadow: inset 0 0 0 1px var(--line), 0 50px 110px -40px rgba(0, 0, 0, .7); }
+.field input, .field textarea, .field select { background: var(--paper); color: var(--text); }
+.field input::placeholder, .field textarea::placeholder { color: #6E7B8C; }
+.field input:focus, .field textarea:focus, .field select:focus { background: #0A1626; box-shadow: inset 0 0 0 2px var(--aqua); }
+.field.is-invalid input { background: #2A1418; }
+.photos__drop { background: var(--paper); border-color: rgba(34, 216, 197, .35); }
+.photos__drop:hover, .photos__drop.is-over { background: #0B2230; border-color: var(--aqua); }
+.photos__status.is-warn { color: #FF8A8F; }
+.form__error { background: #2A1418; color: #FF8A8F; }
