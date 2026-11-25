@@ -13,7 +13,8 @@
       "*.log",
       "README.md",
       "brand.html",
-      "og.html"
+      "og.html",
+      "driveway-options/**"
     ],
     "headers": [
       {

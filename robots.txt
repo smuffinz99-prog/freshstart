@@ -2,3 +2,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://freshstart-washing.web.app/sitemap.xml
+
+# AI assistants: plain-text summary of this business
+# https://freshstart-washing.web.app/llms.txt
